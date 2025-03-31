@@ -10,21 +10,23 @@ import { useFonts } from "expo-font";
 SplashScreen.preventAutoHideAsync();
 
 function AuthRedirect() {
-  const { isAuthenticated, isLoading } = useAuth();
+  let { isAuthenticated, isLoading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
     if (isLoading) return;
 
+    isAuthenticated = true;
     const inAuthGroup = segments[0] === "(auth)";
     const inAppGroup = segments[0] === "(app)";
 
     if (!isAuthenticated && !inAuthGroup) {
       router.replace("/(auth)/login");
     } else if (isAuthenticated && !inAppGroup) {
-      router.replace("/(app)/(tabs)");
+      router.replace("/(app)/(tabs)/car");
     }
+    // router.replace("/(app)/(tabs)/car");
   }, [isAuthenticated, segments, isLoading]);
 
   return <Slot />;
