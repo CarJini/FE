@@ -17,6 +17,7 @@ function AuthRedirect() {
   useEffect(() => {
     if (isLoading) return;
 
+    // TODO: delete this line
     isAuthenticated = true;
     const inAuthGroup = segments[0] === "(auth)";
     const inAppGroup = segments[0] === "(app)";
@@ -26,7 +27,6 @@ function AuthRedirect() {
     } else if (isAuthenticated && !inAppGroup) {
       router.replace("/(app)/(tabs)/car");
     }
-    // router.replace("/(app)/(tabs)/car");
   }, [isAuthenticated, segments, isLoading]);
 
   return <Slot />;

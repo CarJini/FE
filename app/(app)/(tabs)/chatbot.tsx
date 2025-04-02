@@ -11,7 +11,7 @@ import {
   SafeAreaView,
 } from "react-native";
 import React, { useState, useRef } from "react";
-import { IconSymbol } from "@/components/ui/IconSymbol";
+import { Ionicons } from "@expo/vector-icons";
 
 type Message = {
   id: string;
@@ -120,7 +120,7 @@ export default function ChatBotScreen() {
               ]}
               onPress={handleSend}
             >
-              <IconSymbol name="paperplane.fill" size={24} color="white" />
+              <Ionicons name="paper-plane" size={24} color="white" />
             </Pressable>
           </View>
         </KeyboardAvoidingView>
