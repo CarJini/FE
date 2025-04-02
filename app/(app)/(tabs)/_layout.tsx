@@ -1,4 +1,4 @@
-import { Colors } from "@/constants/Colors";
+import { Colors } from "@/src/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import React from "react";
@@ -9,7 +9,6 @@ export default function TabLayout() {
 
   return (
     <Tabs
-      initialRouteName="car"
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: true,
@@ -17,7 +16,7 @@ export default function TabLayout() {
           <Pressable
             {...props}
             android_ripple={{ color: "transparent" }}
-            style={({ pressed }) => [
+            style={() => [
               {
                 flex: 1,
                 justifyContent: "center",
@@ -29,28 +28,19 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="car"
+        name="vehicle/index"
         options={{
           title: "차량",
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({ color }) => (
             <Ionicons name="car" size={20} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="consumables"
-        options={{
-          title: "소모품",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name="build" size={20} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="chatbot"
+        name="chatbot/index"
         options={{
           title: "챗봇",
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({ color }) => (
             <Ionicons
               name="chatbubble-ellipses-outline"
               size={20}
@@ -60,12 +50,30 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="profile/index"
         options={{
           title: "프로필",
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({ color }) => (
             <Ionicons name="person" size={20} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="vehicle/[id]/index"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="vehicle/[id]/edit"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="vehicle/add"
+        options={{
+          href: null,
         }}
       />
     </Tabs>

@@ -1,4 +1,3 @@
-import { AuthContextType, User } from "@/types/auth";
 import {
   createContext,
   ReactNode,
@@ -9,7 +8,7 @@ import {
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { makeRedirectUri } from "expo-auth-session";
+import { AuthContextType, User } from "@/src/types";
 WebBrowser.maybeCompleteAuthSession();
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -69,7 +68,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: userData.email,
         name: userData.name,
       };
-      console.log("user >>>>> ", user);
 
       setUser(user);
       await AsyncStorage.setItem("user", JSON.stringify(user));

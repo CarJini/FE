@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { useThemeColor } from "@/hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
+import { useThemeColor } from "../../hooks/useThemeColor";
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>["name"];
 
@@ -47,6 +47,13 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "#eee",
+    // iOS용 그림자
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    // Android용 그림자
+    elevation: 1,
   },
   pressedItem: {
     backgroundColor: "#f5f5f5",

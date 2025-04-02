@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/src/hooks";
 import {
   View,
   StyleSheet,

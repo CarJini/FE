@@ -3,8 +3,8 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
 
-import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useFonts } from "expo-font";
+import { AuthProvider, useAuth } from "@/src/hooks";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -25,7 +25,7 @@ function AuthRedirect() {
     if (!isAuthenticated && !inAuthGroup) {
       router.replace("/(auth)/login");
     } else if (isAuthenticated && !inAppGroup) {
-      router.replace("/(app)/(tabs)/car");
+      router.replace("/(app)/(tabs)/vehicle");
     }
   }, [isAuthenticated, segments, isLoading]);
 

@@ -3,14 +3,12 @@ import {
   Text,
   Image,
   ScrollView,
-  Pressable,
   StyleSheet,
   SafeAreaView,
 } from "react-native";
 import React from "react";
-import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "react-native";
-import { MenuButton } from "@/components";
+import { MenuButton } from "@/src/components";
 
 export default function ProfileScreen() {
   const colorScheme = useColorScheme();
@@ -83,10 +81,12 @@ const styles = StyleSheet.create({
     margin: 16,
     padding: 16,
     borderRadius: 12,
+    // iOS용 그림자
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    // Android용 그림자
     elevation: 3,
   },
   profileHeader: {
