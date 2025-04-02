@@ -8,7 +8,6 @@ import {
   SafeAreaView,
 } from "react-native";
 import React from "react";
-import { IconSymbol } from "@/components/ui/IconSymbol";
 
 type Car = {
   id: string;
@@ -41,77 +40,46 @@ const dummyCars: Car[] = [
   },
 ];
 
-export default function Carcreen() {
+export default function CarScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
         {/* 차량 목록 */}
         <View style={styles.vehicleList}>
           {dummyCars.map((vehicle) => (
-            <Pressable
-              key={vehicle.id}
-              style={({ pressed }) => [
-                styles.vehicleCard,
-                pressed && styles.pressedCard,
-              ]}
-            >
-              <Image
-                source={{ uri: vehicle.image }}
-                style={styles.vehicleImage}
-              />
-              <View style={styles.vehicleInfo}>
-                <Text style={styles.vehicleName}>{vehicle.name}</Text>
-                <Text style={styles.vehicleModel}>
-                  {vehicle.model} ({vehicle.year})
-                </Text>
-                <View style={styles.maintenanceInfo}>
-                  <Text style={styles.maintenanceText}>
-                    마지막 정비: {vehicle.lastMaintenance}
-                  </Text>
-                  <Text style={styles.maintenanceText}>
-                    다음 정비: {vehicle.nextMaintenance}
-                  </Text>
-                </View>
-              </View>
-            </Pressable>
+            <CarStatus key={vehicle.id} vehicle={vehicle} />
           ))}
-        </View>
-
-        {/* 메뉴 리스트 */}
-        <View style={styles.menuList}>
-          <Pressable
-            style={({ pressed }) => [
-              styles.menuItem,
-              pressed && styles.pressedItem,
-            ]}
-          >
-            <IconSymbol name="car.fill" size={24} color="#007AFF" />
-            <Text style={styles.menuText}>차량 등록</Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </Pressable>
-          <Pressable
-            style={({ pressed }) => [
-              styles.menuItem,
-              pressed && styles.pressedItem,
-            ]}
-          >
-            <IconSymbol name="wrench.fill" size={24} color="#007AFF" />
-            <Text style={styles.menuText}>정비 기록</Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </Pressable>
-          <Pressable
-            style={({ pressed }) => [
-              styles.menuItem,
-              pressed && styles.pressedItem,
-            ]}
-          >
-            <IconSymbol name="message.fill" size={24} color="#007AFF" />
-            <Text style={styles.menuText}>정비 상담</Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </Pressable>
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function CarStatus({ vehicle }: { vehicle: Car }) {
+  return (
+    <Pressable
+      key={vehicle.id}
+      style={({ pressed }) => [
+        styles.vehicleCard,
+        pressed && styles.pressedCard,
+      ]}
+    >
+      <Image source={{ uri: vehicle.image }} style={styles.vehicleImage} />
+      <View style={styles.vehicleInfo}>
+        <Text style={styles.vehicleName}>{vehicle.name}</Text>
+        <Text style={styles.vehicleModel}>
+          {vehicle.model} ({vehicle.year})
+        </Text>
+        <View style={styles.maintenanceInfo}>
+          <Text style={styles.maintenanceText}>
+            마지막 정비: {vehicle.lastMaintenance}
+          </Text>
+          <Text style={styles.maintenanceText}>
+            다음 정비: {vehicle.nextMaintenance}
+          </Text>
+        </View>
+      </View>
+    </Pressable>
   );
 }
 

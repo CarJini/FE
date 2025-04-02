@@ -7,14 +7,13 @@ import {
   SafeAreaView,
 } from "react-native";
 import React from "react";
-import { IconSymbol } from "@/components/ui/IconSymbol";
+import { Ionicons } from "@expo/vector-icons";
 
 type Consumable = {
   id: string;
   name: string;
-  category: string;
-  lastChange: string;
-  nextChange: string;
+  currentKm: number;
+  changeKm: number;
   status: "good" | "warning" | "danger";
 };
 
@@ -22,25 +21,29 @@ const dummyConsumables: Consumable[] = [
   {
     id: "1",
     name: "엔진오일",
-    category: "엔진",
-    lastChange: "2024-01-15",
-    nextChange: "2024-07-15",
+    currentKm: 8080,
+    changeKm: 15000,
     status: "good",
   },
   {
     id: "2",
-    name: "브레이크 패드",
-    category: "제동장치",
-    lastChange: "2023-12-20",
-    nextChange: "2024-06-20",
+    name: "연료 필터",
+    currentKm: 8800,
+    changeKm: 60000,
     status: "warning",
   },
   {
     id: "3",
     name: "타이어",
-    category: "구동장치",
-    lastChange: "2023-11-10",
-    nextChange: "2024-05-10",
+    currentKm: 30000,
+    changeKm: 80000,
+    status: "warning",
+  },
+  {
+    id: "4",
+    name: "미션오일",
+    currentKm: 120000,
+    changeKm: 140000,
     status: "danger",
   },
 ];
@@ -60,75 +63,73 @@ export default function ConsumablesScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
-        {/* 소모품 목록 */}
         <View style={styles.consumablesList}>
           {dummyConsumables.map((consumable) => (
-            <Pressable
-              key={consumable.id}
-              style={({ pressed }) => [
-                styles.consumableCard,
-                pressed && styles.pressedCard,
-              ]}
-            >
-              <View style={styles.consumableHeader}>
-                <Text style={styles.consumableName}>{consumable.name}</Text>
-                <View
-                  style={[
-                    styles.statusIndicator,
-                    { backgroundColor: getStatusColor(consumable.status) },
-                  ]}
-                />
-              </View>
-              <Text style={styles.consumableCategory}>
-                {consumable.category}
-              </Text>
-              <View style={styles.changeInfo}>
-                <Text style={styles.changeText}>
-                  마지막 교체: {consumable.lastChange}
-                </Text>
-                <Text style={styles.changeText}>
-                  다음 교체: {consumable.nextChange}
-                </Text>
-              </View>
-            </Pressable>
+            <ConsumableStatus key={consumable.id} consumable={consumable} />
           ))}
         </View>
-
-        {/* 메뉴 리스트 */}
-        <View style={styles.menuList}>
-          <Pressable
-            style={({ pressed }) => [
-              styles.menuItem,
-              pressed && styles.pressedItem,
-            ]}
-          >
-            <IconSymbol name="wrench.fill" size={24} color="#007AFF" />
-            <Text style={styles.menuText}>소모품 교체 기록</Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </Pressable>
-          <Pressable
-            style={({ pressed }) => [
-              styles.menuItem,
-              pressed && styles.pressedItem,
-            ]}
-          >
-            <IconSymbol name="message.fill" size={24} color="#007AFF" />
-            <Text style={styles.menuText}>교체 상담</Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </Pressable>
-          <Pressable
-            style={({ pressed }) => [
-              styles.menuItem,
-              pressed && styles.pressedItem,
-            ]}
-          >
-            <IconSymbol name="car.fill" size={24} color="#007AFF" />
-            <Text style={styles.menuText}>정비소 찾기</Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </Pressable>
-        </View>
       </ScrollView>
+      <AddConsumableButton />
     </SafeAreaView>
+  );
+}
+
+function AddConsumableButton() {
+  return (
+    <Pressable
+      style={({ pressed }) => [
+        styles.floatingButton,
+        pressed && styles.pressedButton,
+      ]}
+    >
+      <Text style={styles.floatingButtonText}>+</Text>
+    </Pressable>
+  );
+}
+
+function ConsumableStatus({ consumable }: { consumable: Consumable }) {
+  const progress = Math.min(consumable.currentKm / consumable.changeKm, 1);
+  const progressPercentage = Math.round(progress * 100);
+
+  return (
+    <Pressable
+      key={consumable.id}
+      style={({ pressed }) => [
+        styles.consumableCard,
+        pressed && styles.pressedCard,
+      ]}
+    >
+      <View style={styles.consumableHeader}>
+        <Text style={styles.consumableName}>{consumable.name}</Text>
+        <View
+          style={[
+            styles.statusIndicator,
+            { backgroundColor: getStatusColor(consumable.status) },
+          ]}
+        />
+      </View>
+      <View style={styles.kmInfoContainer}>
+        <View style={styles.progressBarContainer}>
+          <View
+            style={[
+              styles.progressBar,
+              {
+                width: `${progressPercentage}%`,
+                backgroundColor: getStatusColor(consumable.status),
+              },
+            ]}
+          />
+        </View>
+        <View style={styles.kmTextContainer}>
+          <Text style={styles.kmText}>
+            {consumable.currentKm.toLocaleString()} km
+          </Text>
+          <Text style={styles.kmText}>
+            {consumable.changeKm.toLocaleString()} km
+          </Text>
+        </View>
+      </View>
+    </Pressable>
   );
 }
 
@@ -161,55 +162,61 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 8,
   },
   consumableName: {
     fontSize: 18,
     fontWeight: "bold",
   },
+  kmInfoContainer: {
+    marginTop: 8,
+  },
+  progressBarContainer: {
+    height: 8,
+    backgroundColor: "#E0E0E0",
+    borderRadius: 4,
+    overflow: "hidden",
+    marginVertical: 8,
+  },
+  progressBar: {
+    height: "100%",
+    borderRadius: 4,
+  },
+  kmTextContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  kmText: {
+    fontSize: 12,
+    color: "#666",
+  },
+
   statusIndicator: {
     width: 12,
     height: 12,
     borderRadius: 6,
   },
-  consumableCategory: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 12,
-  },
-  changeInfo: {
-    backgroundColor: "#f5f5f5",
-    padding: 12,
-    borderRadius: 8,
-  },
-  changeText: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 4,
-  },
-  menuList: {
-    backgroundColor: "white",
-    margin: 16,
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  menuItem: {
-    flexDirection: "row",
+  floatingButton: {
+    position: "absolute",
+    width: 56,
+    height: 56,
     alignItems: "center",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    justifyContent: "center",
+    right: 20,
+    bottom: 20,
+    backgroundColor: "#007AFF",
+    borderRadius: 28,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
-  pressedItem: {
-    backgroundColor: "#f5f5f5",
+  floatingButtonText: {
+    fontSize: 24,
+    color: "white",
   },
-  menuText: {
-    flex: 1,
-    fontSize: 16,
-    marginLeft: 12,
-  },
-  menuArrow: {
-    fontSize: 20,
-    color: "#999",
+  pressedButton: {
+    opacity: 0.8,
+    backgroundColor: "#0056b3",
   },
 });
