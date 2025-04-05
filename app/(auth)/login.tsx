@@ -12,10 +12,6 @@ import Icon from "react-native-vector-icons/FontAwesome";
 export default function LoginScreen() {
   const { signInWithGoogle } = useAuth();
 
-  async function handleLogin() {
-    await signInWithGoogle();
-  }
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.top}>
@@ -39,7 +35,7 @@ export default function LoginScreen() {
           간편하게 시작하고{"\n"}나만의 차량 관리를 시작하세요
         </Text>
         <Pressable
-          onPress={handleLogin}
+          onPress={signInWithGoogle}
           style={({ pressed }) => [
             styles.loginButton,
             pressed && styles.buttonPressed,

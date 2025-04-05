@@ -6,37 +6,66 @@ import {
   useState,
 } from "react";
 import * as WebBrowser from "expo-web-browser";
-import * as Google from "expo-auth-session/providers/google";
+import * as Linking from "expo-linking";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContextType, User } from "@/src/types";
-WebBrowser.maybeCompleteAuthSession();
+import { Platform } from "react-native";
+import { baseURL } from "../services/api";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [_, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: process.env.EXPO_PUBLIC_ANDROID_CLIENT_ID,
-    webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID,
-    iosClientId: process.env.EXPO_PUBLIC_IOS_CLIENT_ID,
-  });
-
   useEffect(() => {
-    loadStoredAuth();
+    WebBrowser.maybeCompleteAuthSession();
+    checkAuthStatus();
+
+    const getInitialUrl = async () => {
+      const initialUrl = await Linking.getInitialURL();
+      if (!initialUrl) return;
+
+      handleRedirectUrl(initialUrl);
+    };
+
+    const subscription = Linking.addEventListener("url", ({ url }) => {
+      handleRedirectUrl(url);
+    });
+    getInitialUrl();
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
-  useEffect(() => {
-    if (response?.type === "success") {
-      handleSignInWithGoogle(response.authentication?.accessToken);
-    }
-  }, [response]);
+  async function signInWithGoogle() {
+    setIsLoading(true);
+    const callbackUrl = Linking.createURL("login-callback");
+    const backendApi = `${baseURL}/auth/google-login?redirectUrl=`;
+    const googleLoginUrl = `${backendApi}${callbackUrl}`;
 
-  async function loadStoredAuth() {
     try {
+      if (Platform.OS === "ios") {
+        await Linking.openURL(googleLoginUrl);
+      } else {
+        await WebBrowser.openAuthSessionAsync(googleLoginUrl, callbackUrl);
+      }
+    } catch (error) {
+      console.error("Error during Google login", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function checkAuthStatus() {
+    try {
+      const accessToken = await AsyncStorage.getItem("accessToken");
       const userJson = await AsyncStorage.getItem("user");
-      if (userJson) {
+
+      if (accessToken && userJson) {
         setUser(JSON.parse(userJson));
+      } else if (accessToken) {
+        await fetchUserInfo(accessToken);
       }
     } catch (e) {
       console.error("Failed to load auth info", e);
@@ -45,15 +74,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  async function handleSignInWithGoogle(accessToken: string | undefined) {
-    if (!accessToken) {
-      return { success: false, error: "No Access Token" };
+  async function handleRedirectUrl(url: string) {
+    const { path, queryParams } = Linking.parse(url);
+    if (path !== "login-callback" || !queryParams?.token) {
+      return;
     }
 
-    setIsLoading(true);
+    const accessToken = Array.isArray(queryParams?.token)
+      ? queryParams?.token[0]
+      : queryParams?.token;
 
     try {
-      const userInfoResponse = await fetch(
+      await AsyncStorage.setItem("accessToken", accessToken);
+      await fetchUserInfo(accessToken);
+    } catch (e) {
+      console.error("Error handling redirect URL", e);
+    }
+  }
+
+  async function fetchUserInfo(accessToken: string) {
+    try {
+      const userResponse = await fetch(
         "https://www.googleapis.com/userinfo/v2/me",
         {
           headers: {
@@ -62,47 +103,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       );
 
-      const userData = await userInfoResponse.json();
-      const user: User = {
-        id: userData.id,
-        email: userData.email,
-        name: userData.name,
-      };
+      if (userResponse.status !== 200) {
+        console.error(
+          "구글 정보를 받아오는데 실패 했습니다. 잠시 후 다시 시도해주세요."
+        );
+        return;
+      }
 
+      const user = await userResponse.json();
       setUser(user);
       await AsyncStorage.setItem("user", JSON.stringify(user));
-      return { success: true };
     } catch (e) {
-      console.error("Error signing in with Google", e);
-      return { success: false, error: "Error signing in with Google" };
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function signInWithGoogle() {
-    setIsLoading(true);
-    try {
-      const result = await promptAsync();
-
-      if (result?.type !== "success") {
-        return {
-          success: false,
-          error: "Google sign in was cancelled or failed",
-        };
-      }
-      return { success: true };
-    } catch (e) {
-      console.error("Error initiating Google sign in", e);
-      return { success: false, error: "Error initiating Google sign in" };
-    } finally {
-      setIsLoading(false);
+      console.error("Failed to load user info", e);
     }
   }
 
   async function signOut() {
     setIsLoading(true);
-    await AsyncStorage.removeItem("user");
+    try {
+      await AsyncStorage.removeItem("accessToken");
+      await AsyncStorage.removeItem("user");
+    } catch (e) {
+      console.error("Failed to remove accessToken and user", e);
+    }
     setUser(null);
     setIsLoading(false);
   }
@@ -111,7 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,
+        isAuthenticated: Boolean(user),
         isLoading,
         signInWithGoogle,
         signOut,
