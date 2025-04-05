@@ -1,119 +1,68 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  StyleSheet,
-  Image,
-  SafeAreaView,
-} from "react-native";
+import { View, Text, ScrollView, StyleSheet, SafeAreaView } from "react-native";
 import React from "react";
-import { Vehicle } from "@/src/types";
 import { VehicleCard } from "@/src/components/vehicle";
 import { FloatingButton } from "@/src/components";
-
-const dummyCars: Vehicle[] = [
-  {
-    id: "1",
-    name: "내 차",
-    model: "아반떼",
-    year: "2020",
-    fuelType: "가솔린",
-    distance: 15000,
-    image: "https://placehold.co/100x100@3x.png",
-    lastMaintenance: "2024-02-15",
-    nextMaintenance: "2024-05-15",
-    consumables: [
-      {
-        id: "1",
-        name: "엔진오일",
-        currentKm: 8080,
-        changeKm: 15000,
-        status: "good",
-      },
-      {
-        id: "2",
-        name: "연료 필터",
-        currentKm: 8800,
-        changeKm: 60000,
-        status: "warning",
-      },
-      {
-        id: "3",
-        name: "타이어",
-        currentKm: 30000,
-        changeKm: 80000,
-        status: "warning",
-      },
-      {
-        id: "4",
-        name: "미션오일",
-        currentKm: 120000,
-        changeKm: 140000,
-        status: "danger",
-      },
-    ],
-  },
-  {
-    id: "2",
-    name: "회사 차",
-    model: "소나타",
-    year: "2021",
-    fuelType: "가솔린",
-    distance: 35000,
-    image: "https://placehold.co/100x100@3x.png",
-    lastMaintenance: "2024-01-20",
-    nextMaintenance: "2024-04-20",
-    consumables: [
-      {
-        id: "1",
-        name: "엔진오일",
-        currentKm: 8080,
-        changeKm: 15000,
-        status: "good",
-      },
-      {
-        id: "2",
-        name: "연료 필터",
-        currentKm: 8800,
-        changeKm: 60000,
-        status: "warning",
-      },
-      {
-        id: "3",
-        name: "타이어",
-        currentKm: 30000,
-        changeKm: 80000,
-        status: "warning",
-      },
-      {
-        id: "4",
-        name: "미션오일",
-        currentKm: 120000,
-        changeKm: 140000,
-        status: "danger",
-      },
-    ],
-  },
-];
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { dummyCars } from "@/src/dummydata/data";
 
 export default function VehicleScreen() {
+  function onClickAddVehicle() {
+    router.push("/vehicle/add");
+  }
+
   return (
-    <SafeAreaView>
-      <ScrollView>
-        <View style={styles.vehicleList}>
-          {dummyCars.map((vehicle) => (
-            <VehicleCard key={vehicle.id} vehicle={vehicle} />
-          ))}
-        </View>
+    <SafeAreaView className="flex-1">
+      <ScrollView className="p-4">
+        {dummyCars.map((vehicle) => (
+          <VehicleCard key={vehicle.id} vehicle={vehicle} />
+        ))}
+        {dummyCars.length === 0 && (
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconContainer}>
+              <Ionicons name="car" size={20} />
+            </View>
+            <Text style={styles.emptyTitle}>등록된 차량이 없습니다.</Text>
+            <Text style={styles.emptyDescription}>
+              차량을 등록하고 관리해보세요.
+            </Text>
+          </View>
+        )}
       </ScrollView>
-      <FloatingButton label={"+"} />
+      <FloatingButton label={"+"} onPress={onClickAddVehicle} />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   vehicleList: {
-    padding: 16,
+    flex: 1,
+    justifyContent: "center",
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    padding: 32,
+  },
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#E5F1FF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  emptyDescription: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 24,
+    textAlign: "center",
   },
 });

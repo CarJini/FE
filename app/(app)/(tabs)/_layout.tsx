@@ -11,7 +11,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-        headerShown: true,
+        headerShown: false,
         tabBarButton: (props) => (
           <Pressable
             {...props}
@@ -28,7 +28,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="vehicle/index"
+        name="vehicle"
         options={{
           title: "차량",
           tabBarIcon: ({ color }) => (
@@ -37,7 +37,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="chatbot/index"
+        name="chatbot"
         options={{
           title: "챗봇",
           tabBarIcon: ({ color }) => (
@@ -50,30 +50,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile/index"
+        name="profile"
         options={{
           title: "프로필",
           tabBarIcon: ({ color }) => (
             <Ionicons name="person" size={20} color={color} />
           ),
-        }}
-      />
-      <Tabs.Screen
-        name="vehicle/[id]/index"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="vehicle/[id]/edit"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="vehicle/add"
-        options={{
-          href: null,
         }}
       />
     </Tabs>

@@ -1,14 +1,16 @@
 import { Consumable } from "./consumable.types";
 
+export type FuelType = "가솔린" | "디젤" | "전기" | "하이브리드";
+
 export type Vehicle = {
   id: string;
   name: string;
+  maker: string;
   model: string;
-  year: string;
-  image: string;
-  fuelType: "가솔린" | "디젤" | "전기";
+  year: number;
+  image?: string;
+  fuelType: FuelType;
   distance: number;
-  lastMaintenance: string;
-  nextMaintenance: string;
+  buyDate: string;
   consumables: Consumable[];
 };

@@ -1,133 +1,134 @@
-import { Vehicle } from "@/src/types";
-import { View, Image, Text, StyleSheet } from "react-native";
-import { Divider } from "../ui/Divider";
+import { ConsumableStatusType, Vehicle } from "@/src/types";
+import { View, Image, StyleSheet, Text, Pressable } from "react-native";
 import { ConsumableStatus } from "./ConsumableStatus";
-import { ClickableCard } from "../ui/ClickableCard";
+import { useState } from "react";
+import {
+  Divider,
+  Tab,
+  TabBar,
+  Text as KittenText,
+} from "@ui-kitten/components";
+import { router } from "expo-router";
 
+const statuses = ["danger", "good", "warning"] as const;
+const statusMap: Record<ConsumableStatusType, string> = {
+  danger: "점검 필요",
+  good: "정상",
+  warning: "예정",
+};
 export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
+  const [selectedStatus, setSelectedStatus] = useState(0);
+
+  function onClickVehicle() {
+    router.push(`/vehicle/${vehicle.id}`);
+  }
+
+  const consumableStatusCount = vehicle.consumables.reduce(
+    (acc, consumable) => {
+      acc[consumable.status] = (acc[consumable.status] || 0) + 1;
+      return acc;
+    },
+    {
+      danger: 0,
+      good: 0,
+      warning: 0,
+    }
+  );
+
+  const consumables = vehicle.consumables.filter(
+    (consumable) => consumable.status === statuses[selectedStatus]
+  );
+
   return (
-    <ClickableCard style={styles.vehicleCard}>
-      <View style={styles.vehicleArea}>
-        <Image source={{ uri: vehicle.image }} style={styles.vehicleImage} />
-        <View style={styles.vehicleSummary}>
-          <View style={styles.vehicleInfo}>
-            <View>
-              <Text style={styles.vehicleName}>{vehicle.name}</Text>
-              <Text style={styles.vehicleModel}>
-                {vehicle.model} ({vehicle.year})
-              </Text>
-            </View>
-            <View>
-              <Text style={styles.vehicleDistance}>
-                {vehicle.distance.toLocaleString()}km
-              </Text>
-            </View>
-          </View>
-          <View style={styles.maintenanceInfo}>
-            <View style={styles.maintenanceItem}>
-              <Text style={styles.maintenanceItemCount}>3</Text>
-              <Text style={styles.maintenanceItemLabel}>점검 필요</Text>
-            </View>
-            <Divider length={"70%"} />
-            <View style={styles.maintenanceItem}>
-              <Text style={styles.maintenanceItemCount}>5</Text>
-              <Text style={styles.maintenanceItemLabel}>정상</Text>
-            </View>
-            <Divider length={"70%"} />
-            <View style={styles.maintenanceItem}>
-              <Text style={styles.maintenanceItemCount}>2</Text>
-              <Text style={styles.maintenanceItemLabel}>예정</Text>
+    <View className="bg-white rounded-xl p-4 mb-4 border border-gray-200">
+      <View>
+        <Pressable onPress={onClickVehicle}>
+          <View className="flex-row items-center">
+            <Image
+              source={{ uri: vehicle.image }}
+              className="w-[70px] h-[70px] rounded-lg mr-4"
+            />
+            <View className="flex-1">
+              <View className="flex-row justify-between items-center">
+                <View>
+                  <Text className="text-lg font-bold mb-1">{vehicle.name}</Text>
+                  <Text className="text-sm text-gray-600 mb-2">
+                    {vehicle.model} ({vehicle.year})
+                  </Text>
+                </View>
+                <View>
+                  <Text className="bg-gray-100 px-2 py-1.5 rounded-lg text-blue-500">
+                    {vehicle.distance.toLocaleString()}km
+                  </Text>
+                </View>
+              </View>
             </View>
           </View>
-        </View>
+        </Pressable>
+
+        <Divider style={styles.dividerMargin} />
+
+        <TabBar
+          selectedIndex={selectedStatus}
+          onSelect={(index) => setSelectedStatus(index)}
+        >
+          {statuses.map((status) => (
+            <Tab
+              key={status}
+              title={(evaProps) => (
+                <View className="flex-1 items-center justify-center">
+                  <KittenText
+                    style={{
+                      fontSize: 18,
+                      fontWeight: "heavy",
+                    }}
+                    status={
+                      selectedStatus === statuses.indexOf(status)
+                        ? "primary"
+                        : "basic"
+                    }
+                  >
+                    {consumableStatusCount[status]}
+                  </KittenText>
+
+                  <KittenText
+                    style={{
+                      fontSize: 14,
+                      marginTop: 3,
+                      marginBottom: 8,
+                    }}
+                    status={
+                      selectedStatus === statuses.indexOf(status)
+                        ? "primary"
+                        : "basic"
+                    }
+                  >
+                    {statusMap[status]}
+                  </KittenText>
+                </View>
+              )}
+            />
+          ))}
+        </TabBar>
+        <Divider style={styles.dividerMargin} />
       </View>
-      <View style={styles.consumablesSummary}>
-        {vehicle.consumables.map((consumable, idx) => (
-          <View key={consumable.id} style={styles.consumable}>
+
+      <View>
+        {consumables.map((consumable, idx) => (
+          <Pressable key={consumable.id} onPress={onClickVehicle}>
             <ConsumableStatus consumable={consumable} />
             {idx !== vehicle.consumables.length - 1 && (
-              <Divider length={"100%"} orientation={"horizontal"} />
+              <Divider style={styles.dividerMargin} />
             )}
-          </View>
+          </Pressable>
         ))}
       </View>
-    </ClickableCard>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  vehicleCard: {
-    gap: 16,
-    marginBottom: 16,
-  },
-  pressedCard: {
-    opacity: 0.8,
-  },
-  vehicleArea: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  vehicleSummary: {
-    flex: 1,
-  },
-  vehicleImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-    marginRight: 16,
-  },
-  vehicleInfo: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  vehicleName: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  vehicleModel: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 8,
-  },
-  vehicleDistance: {
-    backgroundColor: "#eee",
-    padding: 6,
-    borderRadius: 8,
-    color: "#007AFF",
-  },
-  maintenanceInfo: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-    height: 60,
-  },
-  maintenanceItem: {
-    flex: 1,
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  maintenanceItemCount: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  maintenanceItemLabel: {
-    fontSize: 12,
-    color: "#666",
-  },
-  consumablesSummary: {
-    flexDirection: "column",
-    gap: 10,
-  },
-  consumable: {
-    flexDirection: "column",
-    gap: 10,
+  dividerMargin: {
+    marginVertical: 4,
   },
 });

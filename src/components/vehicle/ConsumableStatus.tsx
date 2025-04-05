@@ -1,6 +1,5 @@
 import { Consumable } from "@/src/types";
-import { Pressable, View, Text, StyleSheet } from "react-native";
-import { ClickableCard } from "../ui/ClickableCard";
+import { View, Text, StyleSheet } from "react-native";
 
 export function ConsumableStatus({ consumable }: { consumable: Consumable }) {
   const progress = Math.min(consumable.currentKm / consumable.changeKm, 1);
@@ -60,11 +59,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   consumableName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
   },
   kmInfoContainer: {
-    marginTop: 8,
+    marginTop: 4,
   },
   progressBarContainer: {
     height: 8,

@@ -62,7 +62,7 @@ export default function ChatBotScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1">
       <View style={styles.mainContainer}>
         <ScrollView
           ref={scrollViewRef}

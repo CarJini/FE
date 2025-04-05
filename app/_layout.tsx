@@ -3,6 +3,10 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
 
+import * as eva from "@eva-design/eva";
+import { ApplicationProvider, IconRegistry } from "@ui-kitten/components";
+import { EvaIconsPack } from "@ui-kitten/eva-icons";
+
 import { useFonts } from "expo-font";
 import { AuthProvider, useAuth } from "@/src/hooks";
 
@@ -18,7 +22,7 @@ function AuthRedirect() {
     if (isLoading) return;
 
     // TODO: delete this line
-    isAuthenticated = true;
+    // isAuthenticated = true;
     const inAuthGroup = segments[0] === "(auth)";
     const inAppGroup = segments[0] === "(app)";
 
@@ -48,8 +52,13 @@ export default function RootLayout() {
   }
 
   return (
-    <AuthProvider>
-      <AuthRedirect />
-    </AuthProvider>
+    <>
+      <IconRegistry icons={EvaIconsPack} />
+      <ApplicationProvider {...eva} theme={eva.light}>
+        <AuthProvider>
+          <AuthRedirect />
+        </AuthProvider>
+      </ApplicationProvider>
+    </>
   );
 }

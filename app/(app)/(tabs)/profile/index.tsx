@@ -9,62 +9,78 @@ import {
 import React from "react";
 import { useColorScheme } from "react-native";
 import { MenuButton } from "@/src/components";
+import { useAuth } from "@/src/hooks";
+import { router } from "expo-router";
 
 export default function ProfileScreen() {
   const colorScheme = useColorScheme();
+  const { user, signOut } = useAuth();
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.container}>
-        {/* 프로필 카드 */}
-        <View style={styles.profileCard}>
-          <View style={styles.profileHeader}>
+    <SafeAreaView className="flex-1">
+      <ScrollView className="flex-1">
+        <View className="bg-white p-4 m-4 border rounded-xl border-gray-200">
+          <View className="mb-5 flex-row items-center">
             <Image
               source={{ uri: "https://placehold.co/40x40@3x.png" }}
-              style={styles.profileImage}
+              className="radius-full w-20 h-20 rounded-full mr-4"
             />
-            <View style={styles.profileInfo}>
-              <Text style={styles.name}>홍길동</Text>
-              <Text style={styles.email}>hong@example.com</Text>
+            <View className="flex-1">
+              <Text className="font-bold text-xl">{user?.name}</Text>
+              <Text className="text-sm text-gray-600">{user?.email}</Text>
             </View>
           </View>
 
-          <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>2</Text>
-              <Text style={styles.statLabel}>등록차량</Text>
+          <View className="flex-row justify-around border-t border-gray-200 pt-4">
+            <View className="flex-1 items-center">
+              <Text className="text-xl text-blue-500 font-bold">5</Text>
+              <Text className="text-sm text-gray-500">등록차량</Text>
             </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>5</Text>
-              <Text style={styles.statLabel}>정비기록</Text>
+            <View className="flex-1 items-center">
+              <Text className="text-xl text-blue-500 font-bold">5</Text>
+              <Text className="text-sm text-gray-500">정비기록</Text>
             </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>1</Text>
-              <Text style={styles.statLabel}>예정정비</Text>
+            <View className="flex-1 items-center">
+              <Text className="text-xl text-blue-500 font-bold">5</Text>
+              <Text className="text-sm text-gray-500">예정정비</Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.menuList}>
+        <View className="pl-4 pr-4 flex-1">
           <MenuButton
             size={20}
             iconName="person-circle-outline"
-            text="개인정보 수정"
-            description="이름, 회원 탈퇴"
+            text="FAQ"
+            onPress={() => router.push("/profile/faq")}
           />
           <MenuButton
             size={20}
             iconName="notifications-outline"
             text="알림 설정"
-            description="푸시 알림, 이메일 알림"
           />
           <MenuButton
             size={20}
             iconName="information-circle-outline"
-            text="앱 정보"
-            description="버전, 개인정보 처리방침"
+            text="약관"
           />
-          <MenuButton size={20} iconName="log-out-outline" text="로그아웃" />
+          <MenuButton
+            size={20}
+            iconName="information-circle-outline"
+            text="버전"
+          />
+          <MenuButton
+            size={20}
+            iconName="trash-outline"
+            text="탈퇴"
+            onPress={signOut}
+          />
+          <MenuButton
+            size={20}
+            iconName="log-out-outline"
+            text="로그아웃"
+            onPress={signOut}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -72,10 +88,6 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
   profileCard: {
     backgroundColor: "white",
     margin: 16,
@@ -89,39 +101,6 @@ const styles = StyleSheet.create({
     // Android용 그림자
     elevation: 3,
   },
-  profileHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginRight: 16,
-  },
-  profileInfo: {
-    flex: 1,
-  },
-  name: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  email: {
-    fontSize: 14,
-    color: "#666",
-  },
-  statsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
-    paddingTop: 16,
-  },
-  statItem: {
-    alignItems: "center",
-  },
   statNumber: {
     fontSize: 20,
     fontWeight: "bold",
@@ -131,8 +110,5 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 14,
     color: "#666",
-  },
-  menuList: {
-    margin: 16,
   },
 });

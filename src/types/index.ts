@@ -1,5 +1,5 @@
-export { Vehicle } from "./vehicle.types";
+export { Vehicle, FuelType } from "./vehicle.types";
 
-export { Consumable } from "./consumable.types";
+export { Consumable, ConsumableStatusType } from "./consumable.types";
 
 export { User, AuthContextType } from "./auth.types";

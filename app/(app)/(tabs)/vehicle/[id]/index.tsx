@@ -1,52 +1,38 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  StyleSheet,
-  SafeAreaView,
-} from "react-native";
+import { ScrollView, SafeAreaView, Text, View } from "react-native";
 import React from "react";
-import { Consumable } from "@/src/types";
-import { ConsumableStatus } from "@/src/components/vehicle";
 import { FloatingButton } from "@/src/components";
-const dummyConsumables: Consumable[] = [
-  {
-    id: "1",
-    name: "엔진오일",
-    currentKm: 8080,
-    changeKm: 15000,
-    status: "good",
-  },
-  {
-    id: "2",
-    name: "연료 필터",
-    currentKm: 8800,
-    changeKm: 60000,
-    status: "warning",
-  },
-  {
-    id: "3",
-    name: "타이어",
-    currentKm: 30000,
-    changeKm: 80000,
-    status: "warning",
-  },
-  {
-    id: "4",
-    name: "미션오일",
-    currentKm: 120000,
-    changeKm: 140000,
-    status: "danger",
-  },
-];
+import { useRoute } from "@react-navigation/native";
+import { dummyCars } from "@/src/dummydata/data";
+import { ConsumableStatus } from "@/src/components/vehicle";
+import { Divider, Input } from "@ui-kitten/components";
 
 export default function VehicleInfoScreen() {
+  const route = useRoute();
+  const { id } = route.params;
+  const vehicleInfo = dummyCars.find((car) => car.id === id);
+
+  if (!vehicleInfo) {
+    return null;
+  }
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        <View style={styles.consumablesList}>
-          {dummyConsumables.map((consumable) => (
+    <SafeAreaView className="flex-1 bg-white">
+      <ScrollView className="flex-1">
+        <View className="p-4 mb-2">
+          <Text className="text-xl font-bold mb-3">차량 정보</Text>
+          <View className="items-center gap-y-2">
+            {Object.entries(vehicleInfo).map(([key, value]) => {
+              if (key === "consumables" || !value) return null;
+              return (
+                <Input key={key} label={key} value={value} readOnly={true} />
+              );
+            })}
+          </View>
+        </View>
+        <Divider />
+        <View className="p-4">
+          <Text className="text-xl font-bold mb-3">차량 소모품 현황</Text>
+          {vehicleInfo?.consumables?.map((consumable) => (
             <ConsumableStatus key={consumable.id} consumable={consumable} />
           ))}
         </View>
@@ -55,16 +41,3 @@ export default function VehicleInfoScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  consumablesList: {
-    padding: 16,
-  },
-});
