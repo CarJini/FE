@@ -1,7 +1,7 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const baseURL = "https://5800-27-100-211-68.ngrok-free.app";
+export const baseURL = "https://8ebc-116-40-244-27.ngrok-free.app";
 
 // API 기본 URL 설정
 const apiClient = axios.create({

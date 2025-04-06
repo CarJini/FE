@@ -6,16 +6,16 @@ const initData: Vehicle = {
   name: "",
   maker: "",
   model: "",
-  year: new Date().getFullYear(),
   fuelType: "가솔린",
-  distance: 0,
-  buyDate: "",
-  consumables: [],
+  nowKm: 0,
+  startKm: 0,
+  startDate: "",
+  maintenanceItems: [],
 };
 
 interface VehicleAddContextType {
   vehicleData: Vehicle;
-  updateVehicleData: (newData: Vehicle) => void;
+  updateVehicleData: (newData: Partial<Vehicle>) => void;
   resetVehicleData: () => void;
 }
 
@@ -30,7 +30,7 @@ export function VehicleAddProvider({
     JSON.parse(JSON.stringify(initData))
   );
 
-  const updateVehicleData = (newData: Vehicle) => {
+  const updateVehicleData = (newData: Partial<Vehicle>) => {
     setVehicleData((prev) => ({ ...prev, ...newData }));
   };
 

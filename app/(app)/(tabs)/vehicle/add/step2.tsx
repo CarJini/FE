@@ -1,7 +1,8 @@
+import { Card } from "@/src/components";
 import { useVehicleAdd } from "@/src/context";
-import { Card } from "@ui-kitten/components";
+import { Card as KittenCard } from "@ui-kitten/components";
 import { router } from "expo-router";
-import { SafeAreaView, View, Text, Button } from "react-native";
+import { SafeAreaView, ScrollView, Text } from "react-native";
 
 /**
  * 1. 제조사 선택 현대, 기아, 르노삼성, 쉐보레 BMW, 벤츠,아우디 나오고 현대 기아만 선택가능하고 나머진 disabled
@@ -62,27 +63,29 @@ export default function VehicleAddStep2Screen() {
   }
 
   return (
-    <SafeAreaView className="bg-white flex-1">
-      <View className="p-4">
-        <Text className="mb-3 text-2xl font-bold">차종 선택</Text>
-        <Text className="h7 mb-5 text-lg text-gray-700">
-          보유하신 차량의 모델을 선택해주세요.
-        </Text>
-        {carModels.map((car) => (
-          <Card
-            key={car.name}
-            status={car.disabled ? "basic" : "primary"}
-            disabled={car.disabled}
-            onPress={() => onClickCarModel(car.name)}
-            style={{
-              marginVertical: 4,
-              backgroundColor: car.disabled ? "#f0f0f0" : "#fff",
-            }}
-          >
-            <Text>{car.name}</Text>
-          </Card>
-        ))}
-      </View>
+    <SafeAreaView className=" flex-1">
+      <ScrollView className="flex-1 p-4">
+        <Card>
+          <Text className="mb-3 text-2xl font-bold">차종 선택</Text>
+          <Text className="h7 mb-5 text-lg text-gray-700">
+            보유하신 차량의 모델을 선택해주세요.
+          </Text>
+          {carModels.map((car) => (
+            <KittenCard
+              key={car.name}
+              status={car.disabled ? "basic" : "primary"}
+              disabled={car.disabled}
+              onPress={() => onClickCarModel(car.name)}
+              style={{
+                marginVertical: 4,
+                backgroundColor: car.disabled ? "#f0f0f0" : "#fff",
+              }}
+            >
+              <Text>{car.name}</Text>
+            </KittenCard>
+          ))}
+        </Card>
+      </ScrollView>
     </SafeAreaView>
   );
 }

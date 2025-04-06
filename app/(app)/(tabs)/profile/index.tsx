@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import React from "react";
 import { useColorScheme } from "react-native";
-import { MenuButton } from "@/src/components";
+import { Card, MenuButton } from "@/src/components";
 import { useAuth } from "@/src/hooks";
 import { router } from "expo-router";
 
@@ -18,8 +18,8 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView className="flex-1">
-      <ScrollView className="flex-1">
-        <View className="bg-white p-4 m-4 border rounded-xl border-gray-200">
+      <ScrollView className="flex-1 p-4">
+        <Card>
           <View className="mb-5 flex-row items-center">
             <Image
               source={{ uri: "https://placehold.co/40x40@3x.png" }}
@@ -45,9 +45,9 @@ export default function ProfileScreen() {
               <Text className="text-sm text-gray-500">예정정비</Text>
             </View>
           </View>
-        </View>
+        </Card>
 
-        <View className="pl-4 pr-4 flex-1">
+        <View className="flex-1 mt-4">
           <MenuButton
             size={20}
             iconName="person-circle-outline"

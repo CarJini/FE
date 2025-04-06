@@ -13,43 +13,39 @@ export default function LoginScreen() {
   const { signInWithGoogle } = useAuth();
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.top}>
+    <SafeAreaView className="flex-1 bg-white">
+      <View className="basis-1/2 justify-center items-center">
         <Image
           source={require("@/assets/images/logo.png")}
-          style={styles.logo}
+          className="w-[100px] h-[100px] mb-5"
           resizeMode="contain"
         />
-        <Text style={styles.logoTitle}>카지니</Text>
-        <Text style={styles.info}>
+        <Text className="font-bold text-2xl">카지니</Text>
+        <Text className="text-sm text-gray-500 text-center">
           내 차를 더 스마트하게 관리하는 {"\n"} 최고의 자동차 관리 앱
         </Text>
       </View>
-      <View style={styles.middle}>
+      <View className="basis-1/4 flex-row justify-between p-12">
         <IconComponent iconName="wrench" text={"소모품 관리\n자동 알림"} />
         <IconComponent iconName="comment" text={"AI 챗봇\n장비 조언"} />
         <IconComponent iconName="bar-chart" text={"차량 관리\n통계 제공"} />
       </View>
-      <View style={styles.bottom}>
-        <Text style={styles.info}>
+      <View className="basis-1/4 gap-5 items-center">
+        <Text className="text-sm text-gray-500 text-center">
           간편하게 시작하고{"\n"}나만의 차량 관리를 시작하세요
         </Text>
         <Pressable
           onPress={signInWithGoogle}
-          style={({ pressed }) => [
-            styles.loginButton,
-            pressed && styles.buttonPressed,
-          ]}
+          className="bg-white items-center rounded-lg p-4 w-4/5 shadow-md border border-gray-200"
+          style={({ pressed }) => [pressed && styles.buttonPressed]}
         >
-          <View style={styles.googleLoginContainer}>
+          <View className="flex-row items-center gap-3">
             <Image
               source={require("@/assets/images/g-logo.png")}
-              style={styles.googleLogo}
+              className="w-[24px] h-[24px]"
               resizeMode="contain"
             />
-            <Text style={styles.googleLoginButtonText}>
-              Google 계정으로 계속하기
-            </Text>
+            <Text className="font-bold">Google 계정으로 계속하기</Text>
           </View>
         </Pressable>
       </View>
@@ -59,103 +55,17 @@ export default function LoginScreen() {
 
 function IconComponent({ iconName, text }: { iconName: string; text: string }) {
   return (
-    <View style={styles.IconComponent}>
-      <View style={styles.iconCircle}>
+    <View className="flex-col items-center gap-3">
+      <View className="w-[50px] h-[50px] rounded-full bg-slate-300 justify-center items-center">
         <Icon name={iconName} size={24} color="#000" />
       </View>
-      <Text style={styles.iconText}>{text}</Text>
+      <Text className="text-xs text-center">{text}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  top: {
-    flex: 2,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  middle: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    paddingHorizontal: 40,
-  },
-  bottom: {
-    flex: 1,
-    gap: 15,
-    alignItems: "center",
-  },
-  logoTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  info: {
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 24,
-    color: "#666666",
-    opacity: 0.8,
-  },
-  IconComponent: {
-    flexDirection: "column",
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexBasis: "30%",
-    gap: 8,
-  },
-  iconCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#e6e6fa",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  iconText: {
-    fontSize: 12,
-    lineHeight: 16,
-    textAlign: "center",
-  },
-  loginButton: {
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
-    width: "80%",
-  },
   buttonPressed: {
     opacity: 0.5,
-  },
-  logo: {
-    width: 100,
-    height: 100,
-    alignSelf: "center",
-    marginBottom: 20,
-  },
-  googleLogo: {
-    width: 24,
-    height: 24,
-  },
-  googleLoginContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  googleLoginButtonText: {
-    fontSize: 16,
-    fontWeight: "bold",
   },
 });
