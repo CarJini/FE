@@ -17,13 +17,14 @@ import {
   MaintenanceItemStatusType,
   Vehicle,
 } from "@/src/types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Tab,
   TabBar,
   Text as KittenText,
   Divider,
 } from "@ui-kitten/components";
+import apiClient from "@/src/services/api";
 
 const statuses = ["danger", "good", "warning"] as const;
 const statusMap: Record<MaintenanceItemStatusType, string> = {
@@ -33,8 +34,27 @@ const statusMap: Record<MaintenanceItemStatusType, string> = {
 };
 
 export default function VehicleScreen() {
+  useEffect(() => {
+    fetchVehicles();
+  });
+
   function onClickAddVehicle() {
     router.push("/vehicle/add/step1");
+  }
+
+  async function fetchVehicles() {
+    try {
+      // TODO: 가져오는 아이템으로 렌더링하기
+      // 매번 가져오지 않게 개선필요
+      const res = await apiClient.get("/api/car-owner");
+      if (res.status === 200) {
+        const { data } = res.data;
+        console.log("fetch vehicles::::", data);
+        // setVehicles(data);
+      }
+    } catch (error) {
+      console.error("Error fetching vehicles", error);
+    }
   }
 
   return (

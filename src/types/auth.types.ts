@@ -1,7 +1,7 @@
 export interface User {
-  id: number;
   email: string;
-  name?: string;
+  name: string;
+  profile: string;
 }
 
 export interface AuthContextType {

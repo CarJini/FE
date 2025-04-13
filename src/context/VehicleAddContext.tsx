@@ -1,5 +1,6 @@
-import { createContext, useContext, useState } from "react";
-import { Vehicle } from "../types";
+import { createContext, useContext, useEffect, useState } from "react";
+import { Vehicle, VehicleModel } from "../types";
+import apiClient from "../services/api";
 
 const initData: Vehicle = {
   id: "",
@@ -15,6 +16,7 @@ const initData: Vehicle = {
 
 interface VehicleAddContextType {
   vehicleData: Vehicle;
+  vehicleModels: VehicleModel[];
   updateVehicleData: (newData: Partial<Vehicle>) => void;
   resetVehicleData: () => void;
 }
@@ -29,14 +31,31 @@ export function VehicleAddProvider({
   const [vehicleData, setVehicleData] = useState<Vehicle>(
     JSON.parse(JSON.stringify(initData))
   );
+  const [vehicleModels, setVehicleModels] = useState<VehicleModel[]>([]);
 
-  const updateVehicleData = (newData: Partial<Vehicle>) => {
+  useEffect(() => {
+    fetchCarModels();
+  }, []);
+
+  function updateVehicleData(newData: Partial<Vehicle>) {
     setVehicleData((prev) => ({ ...prev, ...newData }));
-  };
+  }
 
-  const resetVehicleData = () => {
+  function resetVehicleData() {
     setVehicleData(JSON.parse(JSON.stringify(initData)));
-  };
+  }
+
+  async function fetchCarModels() {
+    try {
+      const res = await apiClient.get("/api/car");
+      if (res.status === 200) {
+        const { data } = res.data;
+        setVehicleModels(data);
+      }
+    } catch (error) {
+      console.error("Error fetching car makers", error);
+    }
+  }
 
   return (
     <VehicleAddContext.Provider
@@ -44,6 +63,7 @@ export function VehicleAddProvider({
         vehicleData,
         updateVehicleData,
         resetVehicleData,
+        vehicleModels: vehicleModels,
       }}
     >
       {children}

@@ -1,4 +1,4 @@
-export { Vehicle, FuelType } from "./vehicle.types";
+export { Vehicle, VehicleModel, FuelType } from "./vehicle.types";
 
 export {
   MaintenanceItem,

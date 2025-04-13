@@ -14,3 +14,10 @@ export type Vehicle = {
   nowKm: number;
   maintenanceItems: MaintenanceItem[];
 };
+
+export type VehicleModel = {
+  id: number;
+  image: string;
+  brand: string;
+  model: string;
+};

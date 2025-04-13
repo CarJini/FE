@@ -55,7 +55,11 @@ const carModels = [
   },
 ];
 export default function VehicleAddStep2Screen() {
-  const { vehicleData, updateVehicleData } = useVehicleAdd();
+  const { vehicleData, updateVehicleData, vehicleModels } = useVehicleAdd();
+
+  const models = vehicleModels.filter(
+    (model) => model.brand === vehicleData.maker
+  );
 
   function onClickCarModel(model: string) {
     updateVehicleData({ ...vehicleData, model });
@@ -70,18 +74,22 @@ export default function VehicleAddStep2Screen() {
           <Text className="h7 mb-5 text-lg text-gray-700">
             보유하신 차량의 모델을 선택해주세요.
           </Text>
-          {carModels.map((car) => (
+          {models.map((car) => (
             <KittenCard
-              key={car.name}
-              status={car.disabled ? "basic" : "primary"}
-              disabled={car.disabled}
-              onPress={() => onClickCarModel(car.name)}
+              key={car.id}
+              status="primary"
+              // status={car.disabled ? "basic" : "primary"}
+              // disabled={car.disabled}
+              onPress={() => onClickCarModel(car.model)}
               style={{
                 marginVertical: 4,
-                backgroundColor: car.disabled ? "#f0f0f0" : "#fff",
+                // backgroundColor: car.disabled ? "#f0f0f0" : "#fff",
+                backgroundColor: "#fff",
               }}
             >
-              <Text>{car.name}</Text>
+              <Text>
+                {car.model} (id: {car.id})
+              </Text>
             </KittenCard>
           ))}
         </Card>

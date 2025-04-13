@@ -1,13 +1,24 @@
 import { Button, Card, InputBox } from "@/src/components";
 import { useVehicleAdd } from "@/src/context";
+import apiClient from "@/src/services/api";
 import { router } from "expo-router";
 import { Text, SafeAreaView, ScrollView } from "react-native";
 
 export default function VehicleAddStep4Screen() {
   const { vehicleData, updateVehicleData } = useVehicleAdd();
-  function onAdd() {
-    console.log("vehicleData", vehicleData);
-    router.push("/vehicle");
+
+  async function onAdd() {
+    try {
+      const res = await apiClient.post("/api/car-owner", {
+        carId: vehicleData.id,
+        startDate: vehicleData.startDate,
+        startKm: vehicleData.startKm,
+        nowKm: vehicleData.nowKm,
+      });
+      router.push("/vehicle");
+    } catch (error) {
+      console.error("Error adding vehicle", error);
+    }
   }
 
   function onChangeInput(key: string, value: string) {
@@ -36,7 +47,17 @@ export default function VehicleAddStep4Screen() {
             onChangeText={(nextValue) => onChangeInput("name", nextValue)}
           />
           <InputBox
-            label={"주행 거리"}
+            label={"구매 일자"}
+            value={vehicleData.startDate.toString()}
+            onChangeText={(nextValue) => onChangeInput("startDate", nextValue)}
+          />
+          <InputBox
+            label={"시작 주행 거리"}
+            value={vehicleData.startKm.toString()}
+            onChangeText={(nextValue) => onChangeInput("startKm", nextValue)}
+          />
+          <InputBox
+            label={"지금 주행 거리"}
             value={vehicleData.nowKm.toString()}
             onChangeText={(nextValue) => onChangeInput("nowKm", nextValue)}
           />

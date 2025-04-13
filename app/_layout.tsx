@@ -10,7 +10,6 @@ import { EvaIconsPack } from "@ui-kitten/eva-icons";
 import { useFonts } from "expo-font";
 import { AuthProvider, useAuth } from "@/src/hooks";
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 function AuthRedirect() {
@@ -19,10 +18,10 @@ function AuthRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading) {
+      return;
+    }
 
-    // TODO: delete this line
-    // isAuthenticated = true;
     const inAuthGroup = segments[0] === "(auth)";
     const inAppGroup = segments[0] === "(app)";
 

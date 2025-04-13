@@ -10,7 +10,7 @@ import * as Linking from "expo-linking";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContextType, User } from "@/src/types";
 import { Platform } from "react-native";
-import { baseURL } from "../services/api";
+import apiClient, { baseURL } from "../services/api";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signInWithGoogle() {
     setIsLoading(true);
     const callbackUrl = Linking.createURL("login-callback");
-    const backendApi = `${baseURL}/auth/google-login?redirectUrl=`;
+    const backendApi = `${baseURL}/api/auth/login/google?redirectUrl=`;
     const googleLoginUrl = `${backendApi}${callbackUrl}`;
 
     try {
@@ -54,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Error during Google login", error);
     } finally {
       setIsLoading(false);
+      console.log("complete sign in with google");
     }
   }
 
@@ -61,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const accessToken = await AsyncStorage.getItem("accessToken");
       const userJson = await AsyncStorage.getItem("user");
+      console.log("user>>>>", user);
 
       if (accessToken && userJson) {
         setUser(JSON.parse(userJson));
@@ -70,38 +72,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (e) {
       console.error("Failed to load auth info", e);
     } finally {
+      console.log("check auth status complete user:", user);
       setIsLoading(false);
     }
   }
 
   async function handleRedirectUrl(url: string) {
     const { path, queryParams } = Linking.parse(url);
-    if (path !== "login-callback" || !queryParams?.token) {
+    if (
+      path !== "login-callback" ||
+      !queryParams?.accessToken ||
+      !queryParams?.refreshToken
+    ) {
       return;
     }
 
-    const accessToken = Array.isArray(queryParams?.token)
-      ? queryParams?.token[0]
-      : queryParams?.token;
+    const accessToken = Array.isArray(queryParams?.accessToken)
+      ? queryParams?.accessToken[0]
+      : queryParams?.accessToken;
+
+    const refreshToken = Array.isArray(queryParams?.refreshToken)
+      ? queryParams?.refreshToken[0]
+      : queryParams?.refreshToken;
+
+    console.log("token ", {
+      accessToken,
+      refreshToken,
+    });
 
     try {
       await AsyncStorage.setItem("accessToken", accessToken);
+      await AsyncStorage.setItem("refreshToken", refreshToken);
       await fetchUserInfo(accessToken);
     } catch (e) {
       console.error("Error handling redirect URL", e);
+    } finally {
+      console.log("complete handle redirect url");
     }
   }
 
   async function fetchUserInfo(accessToken: string) {
     try {
-      const userResponse = await fetch(
-        "https://www.googleapis.com/userinfo/v2/me",
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const userResponse = await apiClient.get(`/api/profile`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
       if (userResponse.status !== 200) {
         console.error(
@@ -109,12 +125,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
         return;
       }
-
-      const user = await userResponse.json();
+      const { data: userData } = userResponse.data;
+      const user: User = {
+        email: userData.email,
+        name: userData.name,
+        profile: userData.profile,
+      };
+      console.log("user fetch user info >>>>", user);
       setUser(user);
       await AsyncStorage.setItem("user", JSON.stringify(user));
     } catch (e) {
       console.error("Failed to load user info", e);
+    } finally {
+      console.log("complete fetch user info");
     }
   }
 
@@ -122,6 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     try {
       await AsyncStorage.removeItem("accessToken");
+      await AsyncStorage.removeItem("refreshToken");
       await AsyncStorage.removeItem("user");
     } catch (e) {
       console.error("Failed to remove accessToken and user", e);
@@ -130,6 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }
 
+  console.log("isAuthenticated>>>.", user);
   return (
     <AuthContext.Provider
       value={{
