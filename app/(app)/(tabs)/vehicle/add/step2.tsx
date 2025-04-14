@@ -61,8 +61,8 @@ export default function VehicleAddStep2Screen() {
     (model) => model.brand === vehicleData.maker
   );
 
-  function onClickCarModel(model: string) {
-    updateVehicleData({ ...vehicleData, model });
+  function onClickCarModel(modelId: number) {
+    updateVehicleData({ ...vehicleData, id: modelId });
     router.push("/vehicle/add/step3");
   }
 
@@ -80,7 +80,7 @@ export default function VehicleAddStep2Screen() {
               status="primary"
               // status={car.disabled ? "basic" : "primary"}
               // disabled={car.disabled}
-              onPress={() => onClickCarModel(car.model)}
+              onPress={() => onClickCarModel(car.id)}
               style={{
                 marginVertical: 4,
                 // backgroundColor: car.disabled ? "#f0f0f0" : "#fff",

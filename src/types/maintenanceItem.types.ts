@@ -1,6 +1,6 @@
 export type MaintenanceItemStatusType = "danger" | "good" | "warning";
 export type MaintenanceItem = {
-  id: string;
+  id: number;
   name: string;
   replacementCycle?: string;
   remainingKm: number;

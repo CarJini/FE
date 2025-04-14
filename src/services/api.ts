@@ -31,6 +31,7 @@ apiClient.interceptors.response.use(
     return res;
   },
   async (error) => {
+    console.log("axios client interceptors response", error);
     const originalRequest = error.config;
 
     // 이미 재시도한 요청인지 확인 (무한 루프 방지)
@@ -39,21 +40,22 @@ apiClient.interceptors.response.use(
     }
 
     if (error.response.status === 401) {
-      originalRequest._retry = true;
       try {
-        const refreshToken = await AsyncStorage.getItem("refreshToken");
-        // refreshToken으로 accessToken 갱신 필요
-        const response = await apiClient.post("/api/auth/refresh", {
-          refreshToken,
-        });
-        const { accessToken } = response.data;
-
-        await AsyncStorage.setItem("accessToken", accessToken);
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        return apiClient(originalRequest);
+        // const refreshToken = await AsyncStorage.getItem("refreshToken");
+        // // refreshToken으로 accessToken 갱신 필요
+        // const response = await apiClient.post("/api/auth/refresh", {
+        //   refreshToken,
+        // });
+        // const { accessToken } = response.data;
+        // await AsyncStorage.setItem("accessToken", accessToken);
+        // originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        // return apiClient(originalRequest);
       } catch (err) {
         router.push("/(auth)/login");
         console.error("Error refreshing token", err);
+      } finally {
+        originalRequest._retry = true;
+        console.log("finally");
       }
     }
   }

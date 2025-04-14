@@ -47,7 +47,7 @@ export default function VehicleScreen() {
       // TODO: 가져오는 아이템으로 렌더링하기
       // 매번 가져오지 않게 개선필요
       const res = await apiClient.get("/api/car-owner");
-      if (res.status === 200) {
+      if (res && res.status === 200) {
         const { data } = res.data;
         console.log("fetch vehicles::::", data);
         // setVehicles(data);

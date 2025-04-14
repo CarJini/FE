@@ -2,18 +2,18 @@ import { Vehicle } from "../types";
 
 export const dummyCars: Vehicle[] = [
   {
-    id: "1",
+    id: 1,
     name: "내 차",
     maker: "현대",
     model: "아반떼",
     fuelType: "가솔린",
-    startDate: "2020-02-15",
+    startDate: new Date("2020-02-15"),
     startKm: 0,
     nowKm: 15000,
     image: "https://placehold.co/100x100@3x.png",
     maintenanceItems: [
       {
-        id: "1",
+        id: 1,
         name: "엔진오일",
         replacementCycle: "365",
         remainingKm: 15000,
@@ -23,7 +23,7 @@ export const dummyCars: Vehicle[] = [
         iconColor: "black",
       },
       {
-        id: "2",
+        id: 2,
         name: "연료 필터",
         replacementCycle: "365",
         remainingKm: 60000,
@@ -32,7 +32,7 @@ export const dummyCars: Vehicle[] = [
         iconColor: "black",
       },
       {
-        id: "3",
+        id: 3,
         name: "에어클리너 필터",
         replacementCycle: (365 * 2).toString(),
         remainingKm: 40000,
@@ -41,7 +41,7 @@ export const dummyCars: Vehicle[] = [
         iconColor: "black",
       },
       {
-        id: "4",
+        id: 4,
         name: "변속기 오일",
         replacementCycle: (365 * 3).toString(),
         remainingKm: 60000,
@@ -50,7 +50,7 @@ export const dummyCars: Vehicle[] = [
         iconColor: "black",
       },
       {
-        id: "5",
+        id: 5,
         name: "냉각수",
         replacementCycle: (365 * 2).toString(),
         remainingKm: 40000,
@@ -59,7 +59,7 @@ export const dummyCars: Vehicle[] = [
         iconColor: "black",
       },
       {
-        id: "6",
+        id: 6,
         name: "에어컨 필터",
         replacementCycle: "180",
         remainingKm: 5000,
@@ -68,7 +68,7 @@ export const dummyCars: Vehicle[] = [
         iconColor: "black",
       },
       {
-        id: "7",
+        id: 7,
         name: "점화 플러그",
         remainingKm: 100000,
         lastReplacementDate: "2023-01-01",
@@ -76,7 +76,7 @@ export const dummyCars: Vehicle[] = [
         iconColor: "black",
       },
       {
-        id: "8",
+        id: 8,
         name: "브레이크 패드",
         remainingKm: 30000,
         lastReplacementDate: "2023-01-01",

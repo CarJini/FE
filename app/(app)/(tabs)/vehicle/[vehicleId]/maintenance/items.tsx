@@ -8,7 +8,8 @@ import { MaintenanceItem } from "@/src/types";
 
 export default function MaintenanceItemsScreen() {
   const route = useRoute();
-  const { vehicleId } = route.params as { vehicleId: string };
+  const params = route.params as { vehicleId: string };
+  const vehicleId = Number(params.vehicleId);
   const vehicleInfo = dummyCars.find((car) => car.id === vehicleId);
 
   function onAddMaintenance() {

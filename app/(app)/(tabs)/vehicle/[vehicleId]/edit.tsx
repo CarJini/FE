@@ -6,7 +6,7 @@ import { dummyCars } from "@/src/dummydata/data";
 const skipInputNames = ["id", "maintenanceItems"];
 export default function VehicleEditScreen() {
   const route = useRoute();
-  const { vehicleId } = route.params as { vehicleId: string };
+  const { vehicleId } = route.params as { vehicleId: number };
   const vehicleInfo = dummyCars.find((car) => car.id === vehicleId);
 
   if (!vehicleInfo) {

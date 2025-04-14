@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { Vehicle, VehicleModel } from "../types";
 import apiClient from "../services/api";
+import { useAuth } from "../hooks";
 
 const initData: Vehicle = {
   id: "",
@@ -28,6 +29,7 @@ export function VehicleAddProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const { isAuthenticated } = useAuth();
   const [vehicleData, setVehicleData] = useState<Vehicle>(
     JSON.parse(JSON.stringify(initData))
   );
@@ -35,7 +37,7 @@ export function VehicleAddProvider({
 
   useEffect(() => {
     fetchCarModels();
-  }, []);
+  }, [isAuthenticated]);
 
   function updateVehicleData(newData: Partial<Vehicle>) {
     setVehicleData((prev) => ({ ...prev, ...newData }));
@@ -48,7 +50,7 @@ export function VehicleAddProvider({
   async function fetchCarModels() {
     try {
       const res = await apiClient.get("/api/car");
-      if (res.status === 200) {
+      if (res && res.status === 200) {
         const { data } = res.data;
         setVehicleModels(data);
       }

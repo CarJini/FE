@@ -8,6 +8,5 @@ export function InputBox(props: InputProps) {
 const styles = StyleSheet.create({
   input: {
     marginVertical: 8,
-    borderRadius: 12,
   },
 });
