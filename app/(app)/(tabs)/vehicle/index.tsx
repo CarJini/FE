@@ -15,7 +15,7 @@ import { dummyCars } from "@/src/dummydata/data";
 import {
   MaintenanceItem,
   MaintenanceItemStatusType,
-  Vehicle,
+  VehicleModel,
 } from "@/src/types";
 import { useEffect, useState } from "react";
 import {
@@ -24,43 +24,30 @@ import {
   Text as KittenText,
   Divider,
 } from "@ui-kitten/components";
-import apiClient from "@/src/services/api";
+import { useVehicleAdd } from "@/src/context";
 
-const statuses = ["danger", "good", "warning"] as const;
+const statuses = ["교체 필요", "양호", "주의"] as const;
 const statusMap: Record<MaintenanceItemStatusType, string> = {
-  danger: "점검 필요",
-  good: "정상",
-  warning: "예정",
+  "교체 필요": "점검 필요",
+  양호: "정상",
+  주의: "예정",
 };
 
 export default function VehicleScreen() {
+  const { myVehicles, fetchMyVehicles } = useVehicleAdd();
+
   useEffect(() => {
-    fetchVehicles();
-  });
+    fetchMyVehicles();
+  }, []);
 
   function onClickAddVehicle() {
     router.push("/vehicle/add/step1");
   }
 
-  async function fetchVehicles() {
-    try {
-      // TODO: 가져오는 아이템으로 렌더링하기
-      // 매번 가져오지 않게 개선필요
-      const res = await apiClient.get("/api/car-owner");
-      if (res && res.status === 200) {
-        const { data } = res.data;
-        console.log("fetch vehicles::::", data);
-        // setVehicles(data);
-      }
-    } catch (error) {
-      console.error("Error fetching vehicles", error);
-    }
-  }
-
   return (
     <SafeAreaView className="flex-1">
       <ScrollView className="flex-1 min-h-full">
-        {dummyCars.map((vehicle) => (
+        {myVehicles.map((vehicle) => (
           <VehicleCard key={vehicle.id} vehicle={vehicle} />
         ))}
         {dummyCars.length === 0 && (
@@ -76,6 +63,7 @@ export default function VehicleScreen() {
             </Text>
           </View>
         )}
+        {/* TODO: 버튼 하단에 붙이기 */}
         <View className="w-full p-4">
           <Button
             label={dummyCars.length === 0 ? "차량 등록" : "차량 추가 등록"}
@@ -87,8 +75,13 @@ export default function VehicleScreen() {
   );
 }
 
-function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
+function VehicleCard({ vehicle }: { vehicle: VehicleModel }) {
+  const { maintenanceItemsByVehicle, fetchMaintenanceItems } = useVehicleAdd();
   const [selectedStatus, setSelectedStatus] = useState(0);
+
+  useEffect(() => {
+    fetchMaintenanceItems(vehicle.id);
+  }, []);
 
   function onClickVehicle() {
     router.push(`/vehicle/${vehicle.id}/edit`);
@@ -102,21 +95,27 @@ function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
     router.push(`/vehicle/${vehicle.id}/maintenance/${item.id}`);
   }
 
-  const itemStatusCount = vehicle.maintenanceItems.reduce(
-    (acc, item) => {
-      acc[item.status] = (acc[item.status] || 0) + 1;
-      return acc;
-    },
-    {
-      danger: 0,
-      good: 0,
-      warning: 0,
-    }
-  );
+  const itemStatusCount = {
+    "교체 필요": 0,
+    양호: 0,
+    주의: 0,
+  };
 
-  const maintenanceItems = vehicle.maintenanceItems.filter(
-    (item) => item.status === statuses[selectedStatus]
-  );
+  // const itemStatusCount = vehicle.maintenanceItems.reduce(
+  //   (acc, item) => {
+  //     acc[item.status] = (acc[item.status] || 0) + 1;
+  //     return acc;
+  //   },
+  //   {
+  //     danger: 0,
+  //     good: 0,
+  //     warning: 0,
+  //   }
+  // );
+
+  // const maintenanceItems = vehicle.maintenanceItems.filter(
+  //   (item) => item.status === statuses[selectedStatus]
+  // );
 
   return (
     <View className="p-4">
@@ -132,10 +131,7 @@ function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
           <View className="flex-1">
             <View className="flex-row justify-between items-center">
               <View>
-                <Text className="text-lg font-bold mb-1">{vehicle.name}</Text>
-                <Text className="text-sm text-gray-600 mb-2">
-                  {vehicle.model}
-                </Text>
+                <Text className="text-lg font-bold mb-1">{vehicle.model}</Text>
               </View>
               <View>
                 <Text className="bg-gray-100 px-2 py-1.5 rounded-lg text-blue-500">
@@ -165,7 +161,7 @@ function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
           {statuses.map((status) => (
             <Tab
               key={status}
-              title={(evaProps) => (
+              title={(_) => (
                 <View className="flex-1 items-center justify-center">
                   <KittenText
                     style={{
@@ -201,21 +197,20 @@ function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
           ))}
         </TabBar>
         <Divider style={styles.dividerMargin} />
-
-        {maintenanceItems.map((item, idx) => (
-          <View key={item.name}>
+        {maintenanceItemsByVehicle[vehicle.id]?.map((item, idx) => (
+          <View key={item.id}>
             <Pressable
               className="active:bg-gray-200 rounded-lg"
               onPress={() => onClickMaintenanceItem(item)}
             >
               <MaintenanceItemStatus vehicleNowKm={vehicle.nowKm} item={item} />
             </Pressable>
-            {idx !== maintenanceItems.length - 1 && (
+            {idx !== maintenanceItemsByVehicle[vehicle.id].length - 1 && (
               <Divider style={styles.dividerMargin} />
             )}
           </View>
         ))}
-        {maintenanceItems.length === 0 && (
+        {maintenanceItemsByVehicle[vehicle.id]?.length === 0 && (
           <View className="flex-row items-center justify-center py-4">
             <Text className="text-gray-400 text-sm">점검 항목이 없습니다.</Text>
           </View>

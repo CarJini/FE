@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { Card as KittenCard } from "@ui-kitten/components";
 import { SafeAreaView, ScrollView, Text } from "react-native";
 import { VehicleModel } from "@/src/types";
+import { useEffect } from "react";
 
 type VehicleMaker = {
   brand: string;
@@ -12,12 +13,18 @@ type VehicleMaker = {
 };
 
 export default function VehicleAddStep1Screen() {
-  const { vehicleData, updateVehicleData, vehicleModels } = useVehicleAdd();
+  const { vehicleData, updateVehicleData, vehicleModels, fetchCarModels } =
+    useVehicleAdd();
+
+  useEffect(() => {
+    fetchCarModels();
+  }, []);
 
   function onClickMaker(maker: string) {
     updateVehicleData({ ...vehicleData, maker });
     router.push("/vehicle/add/step2");
   }
+
   const vehicleMakers: VehicleMaker[] = [];
   vehicleModels.forEach((model) => {
     const existingMaker = vehicleMakers.find(

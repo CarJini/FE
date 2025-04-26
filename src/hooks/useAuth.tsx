@@ -10,7 +10,8 @@ import * as Linking from "expo-linking";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContextType, User } from "@/src/types";
 import { Platform } from "react-native";
-import apiClient, { baseURL } from "../services/api";
+import { baseURL, apiClient } from "../services/api";
+import { API_ENDPOINTS } from "../services/apiEndpoints";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -62,7 +63,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const accessToken = await AsyncStorage.getItem("accessToken");
       const userJson = await AsyncStorage.getItem("user");
-      console.log("user>>>>", user);
 
       if (accessToken && userJson) {
         setUser(JSON.parse(userJson));
@@ -113,11 +113,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function fetchUserInfo(accessToken: string) {
     try {
-      const userResponse = await apiClient.get(`/api/profile`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const { method, url } = API_ENDPOINTS.USER.PROFILE;
+      const userResponse = await apiClient.request({ method, url });
 
       if (userResponse.status !== 200) {
         console.error(
@@ -131,13 +128,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         name: userData.name,
         profile: userData.profile,
       };
-      console.log("user fetch user info >>>>", user);
       setUser(user);
       await AsyncStorage.setItem("user", JSON.stringify(user));
     } catch (e) {
       console.error("Failed to load user info", e);
-    } finally {
-      console.log("complete fetch user info");
     }
   }
 

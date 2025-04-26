@@ -5,6 +5,7 @@ import { dummyCars } from "@/src/dummydata/data";
 import { MaintenanceItemStatus } from "@/src/components/vehicle";
 import { MaintenanceItem } from "@/src/types";
 import { router } from "expo-router";
+import { useVehicleAdd } from "@/src/context";
 
 const dummyHistories = [
   {
@@ -35,15 +36,17 @@ const dummyHistories = [
 ];
 
 export default function MaintenanceDetailScreen() {
+  const { myVehicles, maintenanceItemsByVehicle, fetchMaintenanceItems } =
+    useVehicleAdd();
   const route = useRoute();
   const params = route.params as { vehicleId: string; itemId: string };
   const vehicleId = Number(params.vehicleId);
   const itemId = Number(params.itemId);
+  const vehicleInfo = myVehicles.find((vehicle) => vehicle.id === vehicleId);
+  const item = maintenanceItemsByVehicle[vehicleId].find(
+    (item) => item.id === itemId
+  );
 
-  const vehicleInfo = dummyCars.find((car) => car.id === vehicleId);
-  const item = vehicleInfo?.maintenanceItems.find((item) => item.id === itemId);
-
-  console.log("vehicleId, itemId", { vehicleId, itemId, vehicleInfo, item });
   function onEditMaintenance() {
     router.push(
       `/vehicle/${vehicleId}/maintenance/form?mode=edit&itemId=${itemId}`

@@ -8,7 +8,6 @@ export type Vehicle = {
   maker: string;
   model: string;
   image?: string;
-  fuelType: FuelType;
   startDate: Date;
   startKm: number;
   nowKm: number;
@@ -20,4 +19,7 @@ export type VehicleModel = {
   image: string;
   brand: string;
   model: string;
+  startDate: Date;
+  startKm: number;
+  nowKm: number;
 };

@@ -1,9 +1,9 @@
-import { VehicleAddProvider } from "@/src/context";
+import { VehicleProvider } from "@/src/context";
 import { Stack } from "expo-router";
 
 export default function VehicleLayout() {
   return (
-    <VehicleAddProvider>
+    <VehicleProvider>
       <Stack
         screenOptions={{
           headerShown: true,
@@ -74,14 +74,7 @@ export default function VehicleLayout() {
             headerShown: true,
           }}
         />
-        <Stack.Screen
-          name="add/step4"
-          options={{
-            title: "차량 등록",
-            headerShown: true,
-          }}
-        />
       </Stack>
-    </VehicleAddProvider>
+    </VehicleProvider>
   );
 }

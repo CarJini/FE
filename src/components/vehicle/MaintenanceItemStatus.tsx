@@ -13,7 +13,8 @@ export function MaintenanceItemStatus({
   vehicleNowKm: number;
   item: MaintenanceItem;
 }) {
-  const kmProgress = item.kmProgress || vehicleNowKm / item.remainingKm || 0;
+  const kmProgress =
+    item.kmProgress || vehicleNowKm / (item.remainingKm ?? 0) || 0;
   const elapsedTime = differenceInDays(
     new Date(item.lastReplacementDate),
     new Date()
@@ -25,7 +26,7 @@ export function MaintenanceItemStatus({
         progressTitle="주행거리 주기"
         progress={kmProgress}
         nowText={`${vehicleNowKm.toLocaleString()} Km`}
-        remainingText={`${item.remainingKm.toLocaleString()} Km`}
+        remainingText={`${item.remainingKm?.toLocaleString()} Km`}
       />
       {item.dayProgress && item.replacementCycle && (
         <>

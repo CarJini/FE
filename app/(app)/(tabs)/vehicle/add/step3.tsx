@@ -1,50 +1,96 @@
-import { Card } from "@/src/components";
+import { Button, Card, InputBox } from "@/src/components";
 import { useVehicleAdd } from "@/src/context";
-import { FuelType } from "@/src/types";
-import { Card as KittenCard } from "@ui-kitten/components";
+import { apiClient } from "@/src/services/api";
+import { API_ENDPOINTS } from "@/src/services/apiEndpoints";
+import { Datepicker } from "@ui-kitten/components";
 import { router } from "expo-router";
-import { SafeAreaView, View, Text, ScrollView } from "react-native";
+import { useEffect } from "react";
+import { Text, SafeAreaView, ScrollView, View } from "react-native";
 
-const fuelTypes: {
-  name: FuelType;
-  disabled: boolean;
-}[] = [
-  { name: "가솔린", disabled: false },
-  { name: "디젤", disabled: false },
-  { name: "전기", disabled: true },
-  { name: "하이브리드", disabled: true },
-];
 export default function VehicleAddStep3Screen() {
-  const { vehicleData, updateVehicleData } = useVehicleAdd();
+  const { vehicleData, updateVehicleData, resetVehicleData } = useVehicleAdd();
 
-  function onClickFuelType(fuelType: FuelType) {
-    updateVehicleData({ ...vehicleData, fuelType });
-    router.push("/vehicle/add/step4");
+  useEffect(() => {
+    return () => {
+      resetVehicleData();
+    };
+  }, []);
+
+  async function onAdd() {
+    try {
+      const { method, url } = API_ENDPOINTS.VEHICLE.CREATE;
+      const res = await apiClient.request({
+        method,
+        url,
+        data: {
+          carId: vehicleData.id,
+          startDate: vehicleData.startDate,
+          startKm: vehicleData.startKm,
+          nowKm: vehicleData.nowKm,
+        },
+      });
+      if (res.status === 200) {
+        router.push("/vehicle");
+      }
+    } catch (error) {
+      console.error("Error adding vehicle", error);
+    }
+  }
+
+  function onChangeInput(key: string, value: string | number | Date) {
+    if (key === "startDate") {
+      value = new Date(value);
+    } else if (key === "startKm" || key === "nowKm") {
+      value = Number(value);
+    }
+
+    updateVehicleData({ ...vehicleData, [key]: value });
   }
 
   return (
     <SafeAreaView className="flex-1">
-      <ScrollView className="flex-1 p-4">
-        <Card>
-          <Text className="mb-3 text-2xl font-bold">유종 선택</Text>
-          <Text className="h7 mb-5 text-lg text-gray-700">
-            보유하신 차량의 유종을 선택해주세요.
-          </Text>
-          {fuelTypes.map((fuelType) => (
-            <KittenCard
-              key={fuelType.name}
-              status={fuelType.disabled ? "basic" : "primary"}
-              disabled={fuelType.disabled}
-              onPress={() => onClickFuelType(fuelType.name)}
+      <ScrollView className="flex-1">
+        <View className="p-4">
+          <Card>
+            <Text className="mb-3 text-2xl font-bold">기본 정보</Text>
+            <InputBox
+              label={"제조사"}
+              value={vehicleData.maker}
+              readOnly={true}
+            />
+            <InputBox
+              label={"차종"}
+              value={vehicleData.model}
+              readOnly={true}
+            />
+            <InputBox
+              label={"차량 별명"}
+              value={vehicleData.name}
+              onChangeText={(nextValue) => onChangeInput("name", nextValue)}
+            />
+            <Datepicker
+              label={"차량 등록일"}
               style={{
-                marginVertical: 4,
-                backgroundColor: fuelType.disabled ? "#f0f0f0" : "#fff",
+                marginVertical: 8,
               }}
-            >
-              <Text>{fuelType.name}</Text>
-            </KittenCard>
-          ))}
-        </Card>
+              date={vehicleData.startDate}
+              onSelect={(nextValue) => onChangeInput("startDate", nextValue)}
+            />
+            <InputBox
+              label={"시작 주행 거리"}
+              keyboardType="numeric"
+              value={vehicleData.startKm.toString()}
+              onChangeText={(nextValue) => onChangeInput("startKm", nextValue)}
+            />
+            <InputBox
+              label={"지금 주행 거리"}
+              keyboardType="numeric"
+              value={vehicleData.nowKm.toString()}
+              onChangeText={(nextValue) => onChangeInput("nowKm", nextValue)}
+            />
+            <Button label="차량 등록하기" onPress={onAdd} />
+          </Card>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
