@@ -3,110 +3,135 @@ import {
   Text,
   TextInput,
   Pressable,
-  StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Keyboard,
   SafeAreaView,
+  Animated,
 } from "react-native";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import { API_ENDPOINTS } from "@/src/services/apiEndpoints";
+import { apiClient } from "@/src/services/api";
+import { replacePathParams } from "@/src/utils";
 
 type Message = {
-  id: string;
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
+  message: string;
+  isUser?: boolean;
+  createdAt?: Date;
 };
 
 export default function ChatBotScreen() {
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: "1",
-      text: "안녕하세요! 카지니 챗봇입니다. 어떤 도움이 필요하신가요?",
+      message: "안녕하세요! 카지니 챗봇입니다. 어떤 도움이 필요하신가요?",
       isUser: false,
-      timestamp: new Date(),
+      createdAt: new Date(),
     },
   ]);
   const [inputText, setInputText] = useState("");
+  const [isBotTyping, setIsBotTyping] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   const scrollToBottom = () => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
   };
 
-  const handleSend = () => {
+  async function onSendMessage() {
+    setInputText("");
     if (!inputText.trim()) return;
 
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      text: inputText,
+    // TODO: 하드코딩 삭제
+    const carOwnerId = "6";
+    const { url, method } = API_ENDPOINTS.CHATBOT.MESSAGE;
+    const userMessage: Message = {
+      message: inputText,
       isUser: true,
-      timestamp: new Date(),
+      createdAt: new Date(),
     };
+    setMessages((prev) => [...prev, userMessage]);
+    setIsBotTyping(true);
 
-    setMessages((prev) => [...prev, newMessage]);
-    setInputText("");
+    try {
+      const res = await apiClient.request({
+        method,
+        url: replacePathParams(url, {
+          carOwnerId: carOwnerId.toString(),
+        }),
+        data: {
+          message: inputText,
+        },
+      });
 
-    // 챗봇 응답 시뮬레이션
-    setTimeout(() => {
-      const botResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        text: "죄송합니다. 아직 개발 중인 기능입니다. 더 나은 서비스로 곧 찾아뵙겠습니다.",
+      if (res.status !== 200) {
+        console.error("Error sending message:", res);
+        return;
+      }
+
+      const botMessage: Message = {
+        message: res.data.data.message,
         isUser: false,
-        timestamp: new Date(),
+        createdAt: new Date(),
       };
-      setMessages((prev) => [...prev, botResponse]);
-    }, 1000);
-  };
+
+      setMessages((prev) => [...prev, botMessage]);
+    } catch (error) {
+      console.error("Error sending message:", error);
+    } finally {
+      setIsBotTyping(false);
+    }
+  }
 
   return (
-    <SafeAreaView className="flex-1">
-      <View style={styles.mainContainer}>
-        <ScrollView
-          ref={scrollViewRef}
-          style={styles.messagesContainer}
-          contentContainerStyle={styles.messagesContent}
-          onContentSizeChange={scrollToBottom}
-          onLayout={scrollToBottom}
-        >
-          {messages.map((message) => (
-            <View
-              key={message.id}
-              style={[
-                styles.messageBubble,
-                message.isUser ? styles.userMessage : styles.botMessage,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.messageText,
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 80}
+      className="flex-1"
+    >
+      <SafeAreaView className="flex-1">
+        <View className="flex-1">
+          <ScrollView
+            ref={scrollViewRef}
+            className="flex-1 p-4 pb-8"
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+            onContentSizeChange={scrollToBottom}
+            onLayout={scrollToBottom}
+          >
+            {messages.map((message) => (
+              <View
+                key={message.message + message.createdAt}
+                className={`max-w-4/5 p-3 rounded-2xl mb-2 ${
                   message.isUser
-                    ? styles.userMessageText
-                    : styles.botMessageText,
-                ]}
+                    ? "self-end bg-blue-600"
+                    : "self-start bg-white"
+                }`}
               >
-                {message.text}
-              </Text>
-              <Text style={styles.timestamp}>
-                {message.timestamp.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </Text>
-            </View>
-          ))}
-        </ScrollView>
+                <Text
+                  className={`text-base leading-6 ${
+                    message.isUser ? "text-white" : "text-gray-800"
+                  }`}
+                >
+                  {message.message}
+                </Text>
+                <Text className="text-xs text-gray-400 mt-1 self-end">
+                  {message.createdAt?.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </View>
+            ))}
+            {isBotTyping && (
+              <View className="max-w-4/5 p-3 rounded-2xl mb-2 self-start bg-white">
+                <TypingIndicator />
+              </View>
+            )}
+          </ScrollView>
 
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-          style={styles.keyboardAvoidingView}
-        >
-          <View style={styles.inputContainer}>
+          <View className="flex-row p-4 bg-white border-t border-gray-200">
             <TextInput
-              style={styles.input}
+              className="flex-1 bg-gray-200 rounded-full px-4 py-2 mr-2 text-base max-h-24"
               value={inputText}
               onChangeText={setInputText}
               placeholder="메시지를 입력하세요..."
@@ -114,95 +139,60 @@ export default function ChatBotScreen() {
               multiline
             />
             <Pressable
-              style={({ pressed }) => [
-                styles.sendButton,
-                pressed && styles.pressedButton,
-              ]}
-              onPress={handleSend}
+              className="w-10 h-10 rounded-full bg-blue-600 justify-center items-center"
+              onPress={onSendMessage}
             >
               <Ionicons name="paper-plane" size={24} color="white" />
             </Pressable>
           </View>
-        </KeyboardAvoidingView>
-      </View>
-    </SafeAreaView>
+        </View>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  mainContainer: {
-    flex: 1,
-  },
-  messagesContainer: {
-    flex: 1,
-  },
-  messagesContent: {
-    padding: 16,
-    paddingBottom: 32,
-  },
-  messageBubble: {
-    maxWidth: "80%",
-    padding: 12,
-    borderRadius: 16,
-    marginBottom: 8,
-  },
-  userMessage: {
-    alignSelf: "flex-end",
-    backgroundColor: "#007AFF",
-  },
-  botMessage: {
-    alignSelf: "flex-start",
-    backgroundColor: "white",
-  },
-  messageText: {
-    fontSize: 16,
-    lineHeight: 22,
-  },
-  userMessageText: {
-    color: "white",
-  },
-  botMessageText: {
-    color: "#333",
-  },
-  timestamp: {
-    fontSize: 12,
-    color: "#999",
-    marginTop: 4,
-    alignSelf: "flex-end",
-  },
-  keyboardAvoidingView: {
-    width: "100%",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    padding: 16,
-    backgroundColor: "white",
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
-  },
-  input: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginRight: 8,
-    fontSize: 16,
-    maxHeight: 100,
-  },
-  sendButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#007AFF",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  pressedButton: {
-    opacity: 0.8,
-  },
-});
+function TypingIndicator() {
+  const dot1 = useRef(new Animated.Value(0)).current;
+  const dot2 = useRef(new Animated.Value(0)).current;
+  const dot3 = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const createAnimation = (dot: Animated.Value, delay: number) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(dot, {
+            toValue: 1,
+            duration: 300,
+            delay,
+            useNativeDriver: true,
+          }),
+          Animated.timing(dot, {
+            toValue: 0.3,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+
+    createAnimation(dot1, 0).start();
+    createAnimation(dot2, 150).start();
+    createAnimation(dot3, 300).start();
+  }, []);
+
+  return (
+    <View className="flex-row items-center h-6">
+      <Animated.View
+        style={{ opacity: dot1 }}
+        className="w-2 h-2 rounded-full bg-gray-500 mx-1"
+      />
+      <Animated.View
+        style={{ opacity: dot2 }}
+        className="w-2 h-2 rounded-full bg-gray-500 mx-1"
+      />
+      <Animated.View
+        style={{ opacity: dot3 }}
+        className="w-2 h-2 rounded-full bg-gray-500 mx-1"
+      />
+    </View>
+  );
+}

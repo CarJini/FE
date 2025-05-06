@@ -1,20 +1,29 @@
 import { Button, Card, InputBox } from "@/src/components";
-import { useVehicleAdd } from "@/src/context";
 import { apiClient } from "@/src/services/api";
 import { API_ENDPOINTS } from "@/src/services/apiEndpoints";
+import { useVehicleStore } from "@/src/store";
 import { Datepicker } from "@ui-kitten/components";
 import { router } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Text, SafeAreaView, ScrollView, View } from "react-native";
 
 export default function VehicleAddStep3Screen() {
-  const { vehicleData, updateVehicleData, resetVehicleData } = useVehicleAdd();
+  const vehicleData = useVehicleStore((state) => state.vehicleData);
+  const updateVehicleData = useVehicleStore((state) => state.updateVehicleData);
+  const resetVehicleData = useVehicleStore((state) => state.resetVehicleData);
+  const [tempDate, setTempDate] = useState<Date | null>(vehicleData.startDate);
 
   useEffect(() => {
     return () => {
       resetVehicleData();
     };
   }, []);
+
+  useEffect(() => {
+    if (tempDate) {
+      updateVehicleData((prev) => ({ ...prev, startDate: tempDate }));
+    }
+  }, [tempDate]);
 
   async function onAdd() {
     try {
@@ -44,7 +53,7 @@ export default function VehicleAddStep3Screen() {
       value = Number(value);
     }
 
-    updateVehicleData({ ...vehicleData, [key]: value });
+    updateVehicleData((prev) => ({ ...prev, [key]: value }));
   }
 
   return (
@@ -73,8 +82,8 @@ export default function VehicleAddStep3Screen() {
               style={{
                 marginVertical: 8,
               }}
-              date={vehicleData.startDate}
-              onSelect={(nextValue) => onChangeInput("startDate", nextValue)}
+              date={tempDate}
+              onSelect={(nextValue) => setTempDate(nextValue)}
             />
             <InputBox
               label={"시작 주행 거리"}

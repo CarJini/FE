@@ -63,7 +63,7 @@ apiClient.interceptors.response.use(
         console.warn("refreshToken", refreshToken);
         if (!refreshToken) {
           console.log("Refresh token not found. Redirecting to login.");
-          router.push("/(auth)/login");
+          router.replace("/(auth)/login");
           return Promise.reject(error);
         }
 

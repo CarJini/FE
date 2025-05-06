@@ -85,4 +85,10 @@ export const API_ENDPOINTS = {
       url: "/api/car/{carOwnerId}/maintenance-items/{maintenanceItemId}/maintenance-history",
     },
   },
+  CHATBOT: {
+    MESSAGE: {
+      method: "POST",
+      url: "/api/chatbot/{carOwnerId}",
+    },
+  },
 };

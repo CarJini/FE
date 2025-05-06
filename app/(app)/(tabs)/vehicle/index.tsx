@@ -23,7 +23,7 @@ import {
   Text as KittenText,
   Divider,
 } from "@ui-kitten/components";
-import { useVehicleAdd } from "@/src/context";
+import { useVehicleStore } from "@/src/store";
 
 const statuses = ["점검 필요", "정상", "예상"] as const;
 const statusMap: Record<MaintenanceItemStatusType, string> = {
@@ -33,7 +33,8 @@ const statusMap: Record<MaintenanceItemStatusType, string> = {
 };
 
 export default function VehicleScreen() {
-  const { myVehicles, fetchMyVehicles } = useVehicleAdd();
+  const myVehicles = useVehicleStore((state) => state.myVehicles);
+  const fetchMyVehicles = useVehicleStore((state) => state.fetchMyVehicles);
 
   useEffect(() => {
     fetchMyVehicles();
@@ -75,7 +76,13 @@ export default function VehicleScreen() {
 }
 
 function VehicleCard({ vehicle }: { vehicle: VehicleModel }) {
-  const { maintenanceItemsByVehicle, fetchMaintenanceItems } = useVehicleAdd();
+  // const { maintenanceItemsByVehicle, fetchMaintenanceItems } = useVehicleAdd();
+  const maintenanceItemsByVehicle = useVehicleStore(
+    (state) => state.maintenanceItemsByVehicle
+  );
+  const fetchMaintenanceItems = useVehicleStore(
+    (state) => state.fetchMaintenanceItems
+  );
   const [selectedStatus, setSelectedStatus] = useState(0);
 
   useEffect(() => {
@@ -156,7 +163,7 @@ function VehicleCard({ vehicle }: { vehicle: VehicleModel }) {
           {statuses.map((status) => (
             <Tab
               key={status}
-              title={(_) => (
+              title={() => (
                 <View className="flex-1 items-center justify-center">
                   <KittenText
                     style={{

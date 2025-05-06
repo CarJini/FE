@@ -101,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     try {
-      await AsyncStorage.setItem("accessToken", "accessToken");
+      await AsyncStorage.setItem("accessToken", accessToken);
       await AsyncStorage.setItem("refreshToken", refreshToken);
       await fetchUserInfo(accessToken);
     } catch (e) {

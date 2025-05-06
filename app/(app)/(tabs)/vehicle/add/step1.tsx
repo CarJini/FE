@@ -1,10 +1,10 @@
 import { Card } from "@/src/components";
-import { useVehicleAdd } from "@/src/context";
 import { router } from "expo-router";
 import { Card as KittenCard } from "@ui-kitten/components";
 import { SafeAreaView, ScrollView, Text } from "react-native";
 import { VehicleModel } from "@/src/types";
 import { useEffect } from "react";
+import { useVehicleStore } from "@/src/store";
 
 type VehicleMaker = {
   brand: string;
@@ -13,8 +13,10 @@ type VehicleMaker = {
 };
 
 export default function VehicleAddStep1Screen() {
-  const { vehicleData, updateVehicleData, vehicleModels, fetchCarModels } =
-    useVehicleAdd();
+  const fetchCarModels = useVehicleStore((state) => state.fetchCarModels);
+  const vehicleData = useVehicleStore((state) => state.vehicleData);
+  const updateVehicleData = useVehicleStore((state) => state.updateVehicleData);
+  const vehicleModels = useVehicleStore((state) => state.vehicleModels);
 
   useEffect(() => {
     fetchCarModels();

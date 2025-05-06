@@ -23,13 +23,6 @@ export default function ProfileLayout() {
           headerShown: true,
         }}
       />
-      <Stack.Screen
-        name="faq"
-        options={{
-          title: "FAQ",
-          headerShown: true,
-        }}
-      />
     </Stack>
   );
 }

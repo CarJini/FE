@@ -1,28 +1,22 @@
-import { Colors } from "@/src/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import React from "react";
-import { Pressable, useColorScheme } from "react-native";
+import { TouchableOpacity } from "react-native";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: false,
         tabBarButton: (props) => (
-          <Pressable
-            {...props}
-            android_ripple={{ color: "transparent" }}
-            style={() => [
-              {
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              },
-            ]}
+          <TouchableOpacity
+            {...(props as React.ComponentProps<typeof TouchableOpacity>)}
+            activeOpacity={0.7}
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
           />
         ),
       }}

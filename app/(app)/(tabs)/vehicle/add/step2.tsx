@@ -1,11 +1,13 @@
 import { Card } from "@/src/components";
-import { useVehicleAdd } from "@/src/context";
+import { useVehicleStore } from "@/src/store";
 import { Card as KittenCard } from "@ui-kitten/components";
 import { router } from "expo-router";
 import { SafeAreaView, ScrollView, Text } from "react-native";
 
 export default function VehicleAddStep2Screen() {
-  const { vehicleData, updateVehicleData, vehicleModels } = useVehicleAdd();
+  const vehicleData = useVehicleStore((state) => state.vehicleData);
+  const updateVehicleData = useVehicleStore((state) => state.updateVehicleData);
+  const vehicleModels = useVehicleStore((state) => state.vehicleModels);
 
   const models = vehicleModels.filter(
     (model) => model.brand === vehicleData.maker

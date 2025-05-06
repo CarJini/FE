@@ -7,15 +7,11 @@ import {
   SafeAreaView,
 } from "react-native";
 import React from "react";
-import { useColorScheme } from "react-native";
 import { Card, MenuButton } from "@/src/components";
 import { useAuth } from "@/src/hooks";
-import { router } from "expo-router";
 
 export default function ProfileScreen() {
-  const colorScheme = useColorScheme();
   const { user, signOut } = useAuth();
-
   return (
     <SafeAreaView className="flex-1">
       <ScrollView className="flex-1 p-4">
@@ -30,50 +26,13 @@ export default function ProfileScreen() {
               <Text className="text-sm text-gray-600">{user?.email}</Text>
             </View>
           </View>
-
-          <View className="flex-row justify-around border-t border-gray-200 pt-4">
-            <View className="flex-1 items-center">
-              <Text className="text-xl text-blue-500 font-bold">5</Text>
-              <Text className="text-sm text-gray-500">등록차량</Text>
-            </View>
-            <View className="flex-1 items-center">
-              <Text className="text-xl text-blue-500 font-bold">5</Text>
-              <Text className="text-sm text-gray-500">정비기록</Text>
-            </View>
-            <View className="flex-1 items-center">
-              <Text className="text-xl text-blue-500 font-bold">5</Text>
-              <Text className="text-sm text-gray-500">예정정비</Text>
-            </View>
-          </View>
         </Card>
 
         <View className="flex-1 mt-4">
           <MenuButton
             size={20}
-            iconName="person-circle-outline"
-            text="FAQ"
-            onPress={() => router.push("/profile/faq")}
-          />
-          <MenuButton
-            size={20}
             iconName="notifications-outline"
             text="알림 설정"
-          />
-          <MenuButton
-            size={20}
-            iconName="information-circle-outline"
-            text="약관"
-          />
-          <MenuButton
-            size={20}
-            iconName="information-circle-outline"
-            text="버전"
-          />
-          <MenuButton
-            size={20}
-            iconName="trash-outline"
-            text="탈퇴"
-            onPress={signOut}
           />
           <MenuButton
             size={20}

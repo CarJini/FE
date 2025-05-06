@@ -1,11 +1,11 @@
 import { ScrollView, SafeAreaView, Text, View } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   MaintenanceItemRequest,
   MaintenanceItemCategoryOptions,
 } from "@/src/types";
 import { Button, InputBox } from "@/src/components";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { IndexPath, Select, SelectItem, Toggle } from "@ui-kitten/components";
 import {
   MaintenanceItemCategoryType,
@@ -13,48 +13,63 @@ import {
 } from "@/src/types/maintenanceItem.types";
 import { API_ENDPOINTS } from "@/src/services/apiEndpoints";
 import { apiClient } from "@/src/services/api";
-import { useVehicleAdd } from "@/src/context";
-import { mapMaintenanceResponseToRequest } from "@/src/utils";
+import {
+  mapMaintenanceResponseToRequest,
+  replacePathParams,
+} from "@/src/utils";
+import { useMaintenanceParams } from "@/src/hooks";
+import { useVehicleStore } from "@/src/store";
 
 export default function MaintenanceItemFormScreen() {
-  const { maintenanceItemsByVehicle, fetchMaintenanceItems } = useVehicleAdd();
-  const router = useRouter();
-  const {
-    mode,
-    itemId: itemIdStr,
-    vehicleId: vehicleIdStr,
-  } = useLocalSearchParams();
-  const vehicleId = Number(vehicleIdStr);
-  const itemId = Number(itemIdStr);
-  const isEditMode = mode === "edit";
-  const item = maintenanceItemsByVehicle[vehicleId]?.find(
-    (item) => item.id === itemId
+  const { isEditMode, vehicleId, itemId } = useMaintenanceParams();
+  const maintenanceItemsByVehicle = useVehicleStore(
+    (state) => state.maintenanceItemsByVehicle
   );
-  const [maintenanceItem, setMaintenanceItem] =
-    useState<MaintenanceItemRequest>(
-      item
-        ? mapMaintenanceResponseToRequest(item)
-        : {
-            name: "",
-            category: "ENGINE_OIL",
-            cycleAlarm: false,
-            kmAlarm: false,
-            replacementCycle: 0,
-            replacementKm: 0,
-          }
-    );
+  const fetchMaintenanceItems = useVehicleStore(
+    (state) => state.fetchMaintenanceItems
+  );
 
+  const router = useRouter();
+  const [maintenanceItem, setMaintenanceItem] =
+    useState<MaintenanceItemRequest | null>(null);
   const [selectedItem, setSelectedItem] = useState<{
     value: MaintenanceItemCategoryType;
     label: string;
-  }>(
-    MaintenanceItemCategoryOptions.find(
-      (option) => option.value === maintenanceItem.category
+  } | null>(null);
+
+  useEffect(() => {
+    const foundItem = maintenanceItemsByVehicle[vehicleId]?.find(
+      (i) => i.id === itemId
+    );
+    if (isEditMode && !foundItem) return;
+
+    const initialItem = foundItem
+      ? mapMaintenanceResponseToRequest(foundItem)
+      : {
+          name: "",
+          category: "ENGINE_OIL" as MaintenanceItemCategoryType,
+          cycleAlarm: false,
+          kmAlarm: false,
+          replacementCycle: 0,
+          replacementKm: 0,
+        };
+
+    setMaintenanceItem(initialItem);
+
+    const defaultCategory = MaintenanceItemCategoryOptions.find(
+      (option) => option.value === initialItem.category
     ) ?? {
       value: "ENGINE_OIL",
       label: "엔진 오일",
-    }
-  );
+    };
+
+    setSelectedItem(defaultCategory);
+  }, [isEditMode, vehicleId, itemId, maintenanceItemsByVehicle]);
+
+  if (!maintenanceItem || !selectedItem) {
+    return null;
+  }
+
   const selectedIndex = new IndexPath(
     MaintenanceItemCategoryOptions.findIndex(
       (option) => option.value === selectedItem.value
@@ -65,7 +80,7 @@ export default function MaintenanceItemFormScreen() {
     const selectedIndex = Array.isArray(index) ? index[0] : index;
     setSelectedItem(MaintenanceItemCategoryOptions[selectedIndex.row]);
     setMaintenanceItem((prev) => ({
-      ...prev,
+      ...prev!,
       category: MaintenanceItemCategoryOptions[selectedIndex.row].value,
     }));
   }
@@ -76,7 +91,7 @@ export default function MaintenanceItemFormScreen() {
   ) {
     // TODO: 한글 입력 이슈
     setMaintenanceItem((prev) => ({
-      ...prev,
+      ...prev!,
       [field]: value,
     }));
   }
@@ -89,31 +104,35 @@ export default function MaintenanceItemFormScreen() {
     checked: boolean;
   }) {
     setMaintenanceItem((prev) => ({
-      ...prev,
+      ...prev!,
       [checkedType]: checked,
     }));
   }
 
   async function onSave() {
-    const carOwnerId = vehicleId.toString();
+    if (!maintenanceItem) return;
     let method: string;
     let url: string;
     let finalUrl: string;
     if (isEditMode) {
       ({ method, url } = API_ENDPOINTS.MAINTENANCE_ITEM.UPDATE);
-      finalUrl = url.replace("{id}", itemId.toString());
-      finalUrl = finalUrl.replace("{carOwnerId}", carOwnerId);
+      finalUrl = replacePathParams(url, {
+        carOwnerId: vehicleId.toString(),
+        id: itemId.toString(),
+      });
     } else {
       ({ method, url } = API_ENDPOINTS.MAINTENANCE_ITEM.CREATE);
-      finalUrl = url.replace("{carOwnerId}", carOwnerId);
+      finalUrl = replacePathParams(url, {
+        carOwnerId: vehicleId.toString(),
+      });
     }
+    console.log("maintenanceItem onsave >>>>", maintenanceItem);
 
-    const newData = maintenanceItem;
     try {
       await apiClient.request({
         method,
         url: finalUrl,
-        data: newData,
+        data: maintenanceItem,
       });
       fetchMaintenanceItems(vehicleId);
       router.push(`/vehicle/${vehicleId}/maintenance/items`);
@@ -123,14 +142,14 @@ export default function MaintenanceItemFormScreen() {
   }
 
   async function onDelete() {
-    const carOwnerId = vehicleId.toString();
     const { method, url } = API_ENDPOINTS.MAINTENANCE_ITEM.DELETE;
-    const finalUrl = url.replace("{carOwnerId}", carOwnerId);
-    const deleteUrl = finalUrl.replace("{id}", itemId.toString());
     try {
       await apiClient.request({
         method,
-        url: deleteUrl,
+        url: replacePathParams(url, {
+          carOwnerId: vehicleId.toString(),
+          id: itemId.toString(),
+        }),
       });
       fetchMaintenanceItems(vehicleId);
       router.push(`/vehicle/${vehicleId}/maintenance/items`);
@@ -139,9 +158,11 @@ export default function MaintenanceItemFormScreen() {
     }
   }
 
-  if (isEditMode && !item) {
+  if (isEditMode && !maintenanceItem) {
     return null;
   }
+
+  console.log("maintenanceItem>>>>>", maintenanceItem);
 
   return (
     <SafeAreaView className="flex-1">

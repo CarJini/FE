@@ -1,17 +1,20 @@
 import { ScrollView, SafeAreaView, View } from "react-native";
 import { Button, Card, InputBox } from "@/src/components";
 import { useRoute } from "@react-navigation/native";
-import { useVehicleAdd } from "@/src/context";
-import { toNumber } from "@/src/utils";
+import { toNumber, replacePathParams } from "@/src/utils";
 import { useEffect, useState } from "react";
 import { API_ENDPOINTS } from "@/src/services/apiEndpoints";
 import { apiClient } from "@/src/services/api";
 import { router } from "expo-router";
+import { useVehicleStore } from "@/src/store";
 
 const skipInputNames = ["id"];
 const readOnlyNames = ["image", "brand", "model"];
 export default function VehicleEditScreen() {
-  const { myVehicles, vehicleModels, fetchCarModels } = useVehicleAdd();
+  const myVehicles = useVehicleStore((state) => state.myVehicles);
+  const vehicleModels = useVehicleStore((state) => state.vehicleModels);
+  const fetchCarModels = useVehicleStore((state) => state.fetchCarModels);
+
   const route = useRoute();
   const { vehicleId } = route.params as { vehicleId: string };
   const vehicleInfo = myVehicles.find(
@@ -49,7 +52,9 @@ export default function VehicleEditScreen() {
       const { method, url } = API_ENDPOINTS.VEHICLE.UPDATE;
       const res = await apiClient.request({
         method,
-        url: url.replace("{carOwnerId}", vehicleData.id.toString()),
+        url: replacePathParams(url, {
+          carOwnerId: vehicleData.id.toString(),
+        }),
         data: {
           carId,
           startDate: vehicleData.startDate,
@@ -72,7 +77,9 @@ export default function VehicleEditScreen() {
       const { method, url } = API_ENDPOINTS.VEHICLE.DELETE;
       const res = await apiClient.request({
         method,
-        url: url.replace("{carOwnerId}", vehicleData.id.toString()),
+        url: replacePathParams(url, {
+          carOwnerId: vehicleData.id.toString(),
+        }),
       });
       if (res.status === 200) {
         router.push("/vehicle");

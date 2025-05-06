@@ -14,7 +14,6 @@ export function MaintenanceItemStatus({
   item: MaintenanceItemResponse;
 }) {
   const kmProgress = item.kmProgress ?? 0;
-  // const elapsedTime = differenceInDays(new Date(item.remainingDay), new Date());
   const elapsedTime = item.remainingDay - item.replacementCycle;
   return (
     <View className="p-2">

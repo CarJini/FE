@@ -1,26 +1,35 @@
 import { ScrollView, SafeAreaView, Text, View } from "react-native";
 import { useState } from "react";
 import { Button, InputBox } from "@/src/components";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { API_ENDPOINTS } from "@/src/services/apiEndpoints";
 import { apiClient } from "@/src/services/api";
 import { MaintenanceHistory } from "@/src/types";
+import { replacePathParams } from "@/src/utils";
+import { useMaintenanceParams } from "@/src/hooks";
+import { useMaintenanceHistoryStore } from "@/src/store/maintenance";
 
-export default function MaintenanceHistoryAddScreen() {
-  const [maintenanceHistory, setMaintenanceHistory] =
-    useState<MaintenanceHistory>({
-      replacementDate: "",
-      replacementKm: 0,
-    });
-  const router = useRouter();
+export default function MaintenanceHistoryFormScreen() {
   const {
-    mode,
-    itemId: itemIdStr,
-    vehicleId: vehicleIdStr,
-  } = useLocalSearchParams();
-  const vehicleId = Number(vehicleIdStr);
-  const maintenanceItemId = Number(itemIdStr);
-  const isEditMode = mode === "edit";
+    vehicleId,
+    itemId: maintenanceItemId,
+    historyId,
+    isEditMode,
+  } = useMaintenanceParams();
+  const history = useMaintenanceHistoryStore((state) => state.current);
+  const [maintenanceHistory, setMaintenanceHistory] =
+    useState<MaintenanceHistory>(
+      isEditMode && history
+        ? {
+            replacementDate: history.replacementDate,
+            replacementKm: history.replacementKm,
+          }
+        : {
+            replacementDate: "",
+            replacementKm: 0,
+          }
+    );
+  const router = useRouter();
 
   function onChangeInput(
     field: keyof MaintenanceHistory,
@@ -37,33 +46,49 @@ export default function MaintenanceHistoryAddScreen() {
     let method: string;
     let url: string;
     let finalUrl: string;
-    if (isEditMode) {
+    if (isEditMode && historyId) {
       ({ method, url } = API_ENDPOINTS.MAINTENANCE_HISTORY.UPDATE);
-      finalUrl = url.replace(
-        "{maintenanceItemId}",
-        maintenanceItemId.toString()
-      );
-      finalUrl = finalUrl.replace("{carOwnerId}", carOwnerId);
+      finalUrl = replacePathParams(url, {
+        carOwnerId,
+        maintenanceItemId: maintenanceItemId.toString(),
+        id: historyId.toString(),
+      });
     } else {
       ({ method, url } = API_ENDPOINTS.MAINTENANCE_HISTORY.CREATE);
-      finalUrl = url.replace("{carOwnerId}", carOwnerId);
-      finalUrl = finalUrl.replace(
-        "{maintenanceItemId}",
-        maintenanceItemId.toString()
-      );
+      finalUrl = replacePathParams(url, {
+        carOwnerId,
+        maintenanceItemId: maintenanceItemId.toString(),
+      });
     }
 
-    const newData = maintenanceHistory;
-    console.log("finalUrl>>>>", { method, finalUrl, newData });
     try {
       await apiClient.request({
         method,
         url: finalUrl,
-        data: newData,
+        data: maintenanceHistory,
       });
       router.push(`/vehicle/${vehicleId}/maintenance/${maintenanceItemId}`);
     } catch (error) {
       console.error("Error saving maintenance item:", error);
+    }
+  }
+
+  async function onDelete() {
+    if (!historyId) return;
+
+    const { method, url } = API_ENDPOINTS.MAINTENANCE_HISTORY.DELETE;
+    try {
+      await apiClient.request({
+        method,
+        url: replacePathParams(url, {
+          carOwnerId: vehicleId.toString(),
+          maintenanceItemId: maintenanceItemId.toString(),
+          id: historyId.toString(),
+        }),
+      });
+      router.push(`/vehicle/${vehicleId}/maintenance/${maintenanceItemId}`);
+    } catch (error) {
+      console.error("Error deleting maintenance item:", error);
     }
   }
 
@@ -87,6 +112,9 @@ export default function MaintenanceHistoryAddScreen() {
             }
           />
         </View>
+        {isEditMode && (
+          <Button label="삭제" color="secondary" onPress={onDelete} />
+        )}
         <Button label={isEditMode ? "저장" : "추가"} onPress={onSave} />
       </ScrollView>
     </SafeAreaView>

@@ -3,12 +3,17 @@ import { Button } from "@/src/components";
 import { useRoute } from "@react-navigation/native";
 import { MaintenanceItemStatus } from "@/src/components/vehicle";
 import { router } from "expo-router";
-import { useVehicleAdd } from "@/src/context";
 import { useEffect } from "react";
+import { useVehicleStore } from "@/src/store";
 
 export default function MaintenanceItemsScreen() {
-  const { myVehicles, maintenanceItemsByVehicle, fetchMaintenanceItems } =
-    useVehicleAdd();
+  const myVehicles = useVehicleStore((state) => state.myVehicles);
+  const maintenanceItemsByVehicle = useVehicleStore(
+    (state) => state.maintenanceItemsByVehicle
+  );
+  const fetchMaintenanceItems = useVehicleStore(
+    (state) => state.fetchMaintenanceItems
+  );
   const route = useRoute();
   const params = route.params as { vehicleId: string };
   const vehicleId = Number(params.vehicleId);
