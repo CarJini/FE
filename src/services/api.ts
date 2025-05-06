@@ -30,6 +30,7 @@ apiClient.interceptors.request.use(
       console.warn(token);
       config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -39,53 +40,51 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 apiClient.interceptors.response.use(
   (res) => res,
   async (error) => {
-    delay(8000);
+    await delay(8000);
     const originalRequest = error.config;
+    console.log("originalRequest.url>>>>>>>", {
+      url: originalRequest.url,
+      retry: originalRequest._retry,
+    });
 
     const { method, url: tokenRefreshUrl } = API_ENDPOINTS.AUTH.REFRESH_TOKEN;
 
     // 무한루프 방지
     if (
-      originalRequest.url?.endsWith(tokenRefreshUrl) ||
-      originalRequest._retry
+      originalRequest.url?.includes(tokenRefreshUrl) ||
+      originalRequest._retry ||
+      error.response?.status !== 401
     ) {
-      console.warn(
-        "Request failed with status code 401 (Refresh token attempt or already retried)"
-      );
       return Promise.reject(error);
     }
 
-    if (error.response?.status === 401) {
-      originalRequest._retry = true;
-
-      try {
-        const refreshToken = await AsyncStorage.getItem("refreshToken");
-        console.warn("refreshToken", refreshToken);
-        if (!refreshToken) {
-          console.log("Refresh token not found. Redirecting to login.");
-          router.replace("/(auth)/login");
-          return Promise.reject(error);
-        }
-
-        const response = await refreshClient.request({
-          method,
-          url: tokenRefreshUrl,
-          data: { refreshToken },
-        });
-
-        const { data: accessToken } = response.data;
-        await AsyncStorage.setItem("accessToken", accessToken);
-
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        return apiClient(originalRequest);
-      } catch (err) {
+    originalRequest._retry = true;
+    try {
+      const refreshToken = await AsyncStorage.getItem("refreshToken");
+      console.warn("refreshToken", refreshToken);
+      if (!refreshToken) {
+        console.log("Refresh token not found. Redirecting to login.");
         await AsyncStorage.multiRemove(["accessToken", "refreshToken", "user"]);
-        router.push("/(auth)/login");
-        console.error("Error refreshing token", err);
-        return Promise.reject(new Error("Refresh token failed"));
+        router.replace("/(auth)/login");
+        return Promise.reject(new Error("No refresh token")); // ✅ 이걸로 끝냄
       }
-    }
 
-    return Promise.reject(error);
+      const response = await refreshClient.request({
+        method,
+        url: tokenRefreshUrl,
+        data: { refreshToken },
+      });
+
+      const { data: accessToken } = response.data;
+      await AsyncStorage.setItem("accessToken", accessToken);
+
+      originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+      return apiClient(originalRequest);
+    } catch (err) {
+      await AsyncStorage.multiRemove(["accessToken", "refreshToken", "user"]);
+      router.replace("/(auth)/login");
+      console.error("Error refreshing token", err);
+      return Promise.reject(new Error("Refresh token failed"));
+    }
   }
 );
