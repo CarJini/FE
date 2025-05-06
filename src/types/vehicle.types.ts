@@ -1,4 +1,4 @@
-import { MaintenanceItem } from "./maintenanceItem.types";
+import { MaintenanceItemResponse } from "./maintenanceItem.types";
 
 export type FuelType = "가솔린" | "디젤" | "전기" | "하이브리드";
 
@@ -11,7 +11,7 @@ export type Vehicle = {
   startDate: Date;
   startKm: number;
   nowKm: number;
-  maintenanceItems: MaintenanceItem[];
+  maintenanceItems: MaintenanceItemResponse[];
 };
 
 export type VehicleModel = {

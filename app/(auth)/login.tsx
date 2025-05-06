@@ -10,6 +10,7 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome";
 
 export default function LoginScreen() {
+  console.log("login screen!");
   const { signInWithGoogle } = useAuth();
 
   return (

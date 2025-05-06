@@ -1,10 +1,14 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { MaintenanceItem, Vehicle, VehicleModel } from "../types";
+import { createContext, useContext, useState } from "react";
+import {
+  MaintenanceItemResponse,
+  MaintenanceItemResponseMap,
+  Vehicle,
+  VehicleModel,
+} from "../types";
 import { apiClient } from "../services/api";
 import { API_ENDPOINTS } from "../services/apiEndpoints";
 import { startOfDay } from "date-fns/fp";
 import { cloneDeep } from "lodash";
-import { MaintenanceItemMap } from "../types/maintenanceItem.types";
 
 const initData: Vehicle = {
   id: 0,
@@ -26,11 +30,7 @@ interface VehicleContextType {
   fetchCarModels: () => void;
   fetchMyVehicles: () => void;
   fetchMaintenanceItems: (vehicleId: string | number) => void;
-  maintenanceItemsByVehicle: MaintenanceItemMap;
-  updateMaintenanceItem: (
-    vehicleId: string | number,
-    item: MaintenanceItem
-  ) => void;
+  maintenanceItemsByVehicle: MaintenanceItemResponseMap;
 }
 
 const VehicleContext = createContext<VehicleContextType | null>(null);
@@ -40,7 +40,7 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
   const [myVehicles, setMyVehicles] = useState<VehicleModel[]>([]);
   const [vehicleModels, setVehicleModels] = useState<VehicleModel[]>([]);
   const [maintenanceItemsByVehicle, setMaintenanceItemsByVehicle] =
-    useState<MaintenanceItemMap>({});
+    useState<MaintenanceItemResponseMap>({});
 
   function updateVehicleData(newData: Partial<Vehicle>) {
     setVehicleData((prev) => ({ ...prev, ...newData }));
@@ -56,33 +56,33 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
       const carOwnerId =
         typeof vehicleId === "string" ? vehicleId : vehicleId.toString();
       const finalUrl = url.replace("{carOwnerId}", carOwnerId.toString());
-
-      const res = await apiClient.request<{ data: MaintenanceItem[] }>({
+      const res = await apiClient.request<{
+        data: {
+          content: MaintenanceItemResponse[];
+        };
+      }>({
         method,
         url: finalUrl,
+        params: {
+          page: 0,
+          size: 100,
+          sort: "DESC",
+        },
       });
       if (res.status === 200) {
+        console.log(
+          'Fetching maintenance items for vehicle ID:", vehicleId);',
+          { data: res.data.data.content }
+        );
+
         setMaintenanceItemsByVehicle((prev) => ({
           ...prev,
-          [vehicleId]: res.data.data,
+          [vehicleId]: res.data.data.content,
         }));
       }
     } catch (error) {
       console.error("Error saving maintenance item:", error);
     }
-  }
-
-  function updateMaintenanceItem(
-    vehicleId: string | number,
-    item: MaintenanceItem
-  ) {
-    vehicleId = typeof vehicleId === "string" ? Number(vehicleId) : vehicleId;
-    setMaintenanceItemsByVehicle((prev) => ({
-      ...prev,
-      [vehicleId]: prev[vehicleId]?.map((existingItem) =>
-        existingItem.id === item.id ? item : existingItem
-      ) || [item],
-    }));
   }
 
   async function fetchCarModels() {
@@ -128,7 +128,6 @@ export function VehicleProvider({ children }: { children: React.ReactNode }) {
         fetchCarModels,
         fetchMyVehicles,
         fetchMaintenanceItems,
-        updateMaintenanceItem,
       }}
     >
       {children}

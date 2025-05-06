@@ -11,9 +11,8 @@ import { MaintenanceItemStatus } from "@/src/components/vehicle";
 import { Button } from "@/src/components";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { dummyCars } from "@/src/dummydata/data";
 import {
-  MaintenanceItem,
+  MaintenanceItemResponse,
   MaintenanceItemStatusType,
   VehicleModel,
 } from "@/src/types";
@@ -26,11 +25,11 @@ import {
 } from "@ui-kitten/components";
 import { useVehicleAdd } from "@/src/context";
 
-const statuses = ["교체 필요", "양호", "주의"] as const;
+const statuses = ["점검 필요", "정상", "예상"] as const;
 const statusMap: Record<MaintenanceItemStatusType, string> = {
-  "교체 필요": "점검 필요",
-  양호: "정상",
-  주의: "예정",
+  "점검 필요": "점검 필요",
+  정상: "정상",
+  예상: "예상",
 };
 
 export default function VehicleScreen() {
@@ -50,7 +49,7 @@ export default function VehicleScreen() {
         {myVehicles.map((vehicle) => (
           <VehicleCard key={vehicle.id} vehicle={vehicle} />
         ))}
-        {dummyCars.length === 0 && (
+        {myVehicles.length === 0 && (
           <View className="items-center justify-center">
             <View className="w-[80px] h-[80px] rounded-lg bg-slate-300 justify-center items-center mb-4">
               <Ionicons name="car" size={32} />
@@ -66,7 +65,7 @@ export default function VehicleScreen() {
         {/* TODO: 버튼 하단에 붙이기 */}
         <View className="w-full p-4">
           <Button
-            label={dummyCars.length === 0 ? "차량 등록" : "차량 추가 등록"}
+            label={myVehicles.length === 0 ? "차량 등록" : "차량 추가 등록"}
             onPress={onClickAddVehicle}
           />
         </View>
@@ -80,8 +79,10 @@ function VehicleCard({ vehicle }: { vehicle: VehicleModel }) {
   const [selectedStatus, setSelectedStatus] = useState(0);
 
   useEffect(() => {
-    fetchMaintenanceItems(vehicle.id);
-  }, []);
+    if (vehicle.id && maintenanceItemsByVehicle[vehicle.id] == null) {
+      fetchMaintenanceItems(vehicle.id);
+    }
+  }, [vehicle.id]);
 
   function onClickVehicle() {
     router.push(`/vehicle/${vehicle.id}/edit`);
@@ -91,31 +92,25 @@ function VehicleCard({ vehicle }: { vehicle: VehicleModel }) {
     router.push(`/vehicle/${vehicle.id}/maintenance/items`);
   }
 
-  function onClickMaintenanceItem(item: MaintenanceItem) {
+  function onClickMaintenanceItem(item: MaintenanceItemResponse) {
     router.push(`/vehicle/${vehicle.id}/maintenance/${item.id}`);
   }
 
-  const itemStatusCount = {
-    "교체 필요": 0,
-    양호: 0,
-    주의: 0,
-  };
+  const itemStatusCount = (maintenanceItemsByVehicle[vehicle.id] ?? []).reduce(
+    (acc, item) => {
+      acc[item.status] = (acc[item.status] || 0) + 1;
+      return acc;
+    },
+    {
+      "점검 필요": 0,
+      정상: 0,
+      예상: 0,
+    }
+  );
 
-  // const itemStatusCount = vehicle.maintenanceItems.reduce(
-  //   (acc, item) => {
-  //     acc[item.status] = (acc[item.status] || 0) + 1;
-  //     return acc;
-  //   },
-  //   {
-  //     danger: 0,
-  //     good: 0,
-  //     warning: 0,
-  //   }
-  // );
-
-  // const maintenanceItems = vehicle.maintenanceItems.filter(
-  //   (item) => item.status === statuses[selectedStatus]
-  // );
+  const maintenanceItems = maintenanceItemsByVehicle[vehicle.id]?.filter(
+    (item) => item.status === statuses[selectedStatus]
+  );
 
   return (
     <View className="p-4">
@@ -197,7 +192,7 @@ function VehicleCard({ vehicle }: { vehicle: VehicleModel }) {
           ))}
         </TabBar>
         <Divider style={styles.dividerMargin} />
-        {maintenanceItemsByVehicle[vehicle.id]?.map((item, idx) => (
+        {maintenanceItems?.map((item, idx) => (
           <View key={item.id}>
             <Pressable
               className="active:bg-gray-200 rounded-lg"
@@ -205,12 +200,12 @@ function VehicleCard({ vehicle }: { vehicle: VehicleModel }) {
             >
               <MaintenanceItemStatus vehicleNowKm={vehicle.nowKm} item={item} />
             </Pressable>
-            {idx !== maintenanceItemsByVehicle[vehicle.id].length - 1 && (
+            {idx !== maintenanceItems.length - 1 && (
               <Divider style={styles.dividerMargin} />
             )}
           </View>
         ))}
-        {maintenanceItemsByVehicle[vehicle.id]?.length === 0 && (
+        {maintenanceItems?.length === 0 && (
           <View className="flex-row items-center justify-center py-4">
             <Text className="text-gray-400 text-sm">점검 항목이 없습니다.</Text>
           </View>

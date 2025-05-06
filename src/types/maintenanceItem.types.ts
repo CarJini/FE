@@ -1,5 +1,21 @@
 // export type MaintenanceItemStatusType = "danger" | "good" | "warning";
-export type MaintenanceItemStatusType = "주의" | "교체 필요" | "양호";
+
+// export type MaintenanceItem = {
+//   id: number;
+//   name: string;
+//   category: MaintenanceItemCategoryType;
+//   cycleAlarm?: boolean;
+//   replacementKm?: number;
+//   replacementCycle?: number;
+//   kmAlarm?: boolean;
+//   status: MaintenanceItemStatusType;
+//   remainingKm?: number;
+//   remainingDay?: number;
+//   kmProgress?: number;
+//   dayProgress?: number;
+// };
+
+export type MaintenanceItemStatusType = "예상" | "점검 필요" | "정상";
 export type MaintenanceItemCategoryType =
   | "ENGINE_OIL"
   | "BRAKE_PAD"
@@ -15,20 +31,27 @@ export const MaintenanceItemCategoryOptions = [
   { value: "COOLANT", label: "냉각수" },
 ] as const;
 
-export type MaintenanceItemMap = Record<number, MaintenanceItem[]>;
+export type MaintenanceItemResponseMap = Record<
+  number,
+  MaintenanceItemResponse[]
+>;
 
-export type MaintenanceItem = {
-  id: number;
+type BaseMaintenanceItem = {
   name: string;
   category: MaintenanceItemCategoryType;
-  cycleAlarm?: boolean;
-  replacementCycle?: string;
-  lastReplacementDate: string | Date;
+  cycleAlarm: boolean;
+  kmAlarm: boolean;
+  replacementCycle: number;
+  replacementKm: number;
+};
+
+export type MaintenanceItemRequest = BaseMaintenanceItem;
+
+export type MaintenanceItemResponse = BaseMaintenanceItem & {
+  id: number;
   status: MaintenanceItemStatusType;
-  progress?: number;
-  kmAlarm?: boolean;
-  remainingKm?: number;
-  replacementKm?: number;
-  kmProgress?: number;
+  remainingKm: number;
+  remainingDay: number;
+  kmProgress: number;
   dayProgress?: number;
 };

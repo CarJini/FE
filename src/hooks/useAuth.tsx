@@ -101,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     try {
-      await AsyncStorage.setItem("accessToken", accessToken);
+      await AsyncStorage.setItem("accessToken", "accessToken");
       await AsyncStorage.setItem("refreshToken", refreshToken);
       await fetchUserInfo(accessToken);
     } catch (e) {
@@ -138,9 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signOut() {
     setIsLoading(true);
     try {
-      await AsyncStorage.removeItem("accessToken");
-      await AsyncStorage.removeItem("refreshToken");
-      await AsyncStorage.removeItem("user");
+      await AsyncStorage.multiRemove(["accessToken", "refreshToken", "user"]);
     } catch (e) {
       console.error("Failed to remove accessToken and user", e);
     }

@@ -70,19 +70,19 @@ export const API_ENDPOINTS = {
   MAINTENANCE_HISTORY: {
     UPDATE: {
       method: "PUT",
-      url: "/api/car/{carOwnerId}/maintenance-items/{maintenanceItemId}/maintenance-history",
-    },
-    CREATE: {
-      method: "POST",
-      url: "/api/maintenance-history",
+      url: "/api/car/{carOwnerId}/maintenance-items/{maintenanceItemId}/maintenance-history/{id}",
     },
     DELETE: {
       method: "DELETE",
-      url: "/api/maintenance-history/{historyId}",
+      url: "/api/car/{carOwnerId}/maintenance-items/{maintenanceItemId}/maintenance-history/{id}",
+    },
+    CREATE: {
+      method: "POST",
+      url: "/api/car/{carOwnerId}/maintenance-items/{maintenanceItemId}/maintenance-history",
     },
     LIST: {
       method: "GET",
-      url: "/api/maintenance-history",
+      url: "/api/car/{carOwnerId}/maintenance-items/{maintenanceItemId}/maintenance-history",
     },
   },
 };

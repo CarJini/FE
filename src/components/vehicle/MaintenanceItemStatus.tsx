@@ -1,4 +1,4 @@
-import { MaintenanceItem } from "@/src/types";
+import { MaintenanceItemResponse } from "@/src/types";
 import {
   Divider,
   ProgressBar as KittenProgressBar,
@@ -11,14 +11,11 @@ export function MaintenanceItemStatus({
   item,
 }: {
   vehicleNowKm: number;
-  item: MaintenanceItem;
+  item: MaintenanceItemResponse;
 }) {
-  const kmProgress =
-    item.kmProgress || vehicleNowKm / (item.remainingKm ?? 0) || 0;
-  const elapsedTime = differenceInDays(
-    new Date(item.lastReplacementDate),
-    new Date()
-  );
+  const kmProgress = item.kmProgress ?? 0;
+  // const elapsedTime = differenceInDays(new Date(item.remainingDay), new Date());
+  const elapsedTime = item.remainingDay - item.replacementCycle;
   return (
     <View className="p-2">
       <Text className="text-lg font-bold mb-2">{item.name}</Text>
@@ -28,17 +25,18 @@ export function MaintenanceItemStatus({
         nowText={`${vehicleNowKm.toLocaleString()} Km`}
         remainingText={`${item.remainingKm?.toLocaleString()} Km`}
       />
-      {item.dayProgress && item.replacementCycle && (
-        <>
-          <Divider style={{ marginVertical: 4 }} />
-          <ProgressBar
-            progressTitle="기간 주기"
-            progress={item.dayProgress}
-            nowText={`${elapsedTime}일 경과`}
-            remainingText={`${item.replacementCycle?.toString()} 일`}
-          />
-        </>
-      )}
+      {item.dayProgress !== undefined &&
+        item.replacementCycle !== undefined && (
+          <>
+            <Divider style={{ marginVertical: 4 }} />
+            <ProgressBar
+              progressTitle="기간 주기"
+              progress={item.dayProgress}
+              nowText={`${elapsedTime}일 경과`}
+              remainingText={`${item.replacementCycle?.toString()} 일`}
+            />
+          </>
+        )}
     </View>
   );
 }
@@ -62,14 +60,14 @@ function ProgressBar({
         </Text>
         <View
           className="px-1 rounded-full"
-          style={[{ backgroundColor: getStatusColor(progress) }]}
+          style={[{ backgroundColor: getStatusColor(progress / 100) }]}
         >
           <Text className="text-white text-xs font-bold text-center">
-            {Math.round(progress * 100)}%
+            {progress}%
           </Text>
         </View>
       </View>
-      <KittenProgressBar progress={progress} size="medium" />
+      <KittenProgressBar progress={progress / 100} size="medium" />
       <View className="flex-row justify-between">
         <Text className="text-sm text-gray-800">{nowText}</Text>
         <Text className="text-sm text-gray-800">{remainingText}</Text>

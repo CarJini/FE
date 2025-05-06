@@ -26,8 +26,8 @@ const refreshClient = axios.create({
 apiClient.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem("accessToken");
-    console.warn("Request interceptor", token);
     if (token) {
+      console.warn(token);
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -35,30 +35,34 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 apiClient.interceptors.response.use(
-  (res) => {
-    return res;
-  },
+  (res) => res,
   async (error) => {
-    console.log("axios client interceptors response", error);
+    delay(8000);
     const originalRequest = error.config;
 
     const { method, url: tokenRefreshUrl } = API_ENDPOINTS.AUTH.REFRESH_TOKEN;
 
-    // 무한 루프 방지
+    // 무한루프 방지
     if (
       originalRequest.url?.endsWith(tokenRefreshUrl) ||
       originalRequest._retry
     ) {
-      console.warn("Request failed with status code 401");
+      console.warn(
+        "Request failed with status code 401 (Refresh token attempt or already retried)"
+      );
       return Promise.reject(error);
     }
 
-    if (error.response.status === 401) {
+    if (error.response?.status === 401) {
       originalRequest._retry = true;
+
       try {
         const refreshToken = await AsyncStorage.getItem("refreshToken");
+        console.warn("refreshToken", refreshToken);
         if (!refreshToken) {
+          console.log("Refresh token not found. Redirecting to login.");
           router.push("/(auth)/login");
           return Promise.reject(error);
         }
@@ -66,18 +70,22 @@ apiClient.interceptors.response.use(
         const response = await refreshClient.request({
           method,
           url: tokenRefreshUrl,
-          data: {
-            refreshToken,
-          },
+          data: { refreshToken },
         });
+
         const { data: accessToken } = response.data;
         await AsyncStorage.setItem("accessToken", accessToken);
+
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return apiClient(originalRequest);
       } catch (err) {
+        await AsyncStorage.multiRemove(["accessToken", "refreshToken", "user"]);
         router.push("/(auth)/login");
         console.error("Error refreshing token", err);
+        return Promise.reject(new Error("Refresh token failed"));
       }
     }
+
+    return Promise.reject(error);
   }
 );

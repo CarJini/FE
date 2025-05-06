@@ -1,9 +1,13 @@
 export { Vehicle, VehicleModel, FuelType } from "./vehicle.types";
 
 export {
-  MaintenanceItem,
+  MaintenanceItemRequest,
+  MaintenanceItemResponse,
+  MaintenanceItemResponseMap,
   MaintenanceItemStatusType,
   MaintenanceItemCategoryOptions,
 } from "./maintenanceItem.types";
 
 export { User, AuthContextType } from "./auth.types";
+
+export { MaintenanceHistory } from "./maintenanceHistory.types";
