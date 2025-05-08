@@ -89,7 +89,6 @@ export default function MaintenanceItemFormScreen() {
     field: keyof MaintenanceItemResponse,
     value: string | number | boolean
   ) {
-    // TODO: 한글 입력 이슈
     setMaintenanceItem((prev) => ({
       ...prev!,
       [field]: value,
@@ -126,7 +125,6 @@ export default function MaintenanceItemFormScreen() {
         carOwnerId: vehicleId.toString(),
       });
     }
-    console.log("maintenanceItem onsave >>>>", maintenanceItem);
 
     try {
       await apiClient.request({
@@ -162,18 +160,11 @@ export default function MaintenanceItemFormScreen() {
     return null;
   }
 
-  console.log("maintenanceItem>>>>>", maintenanceItem);
-
   return (
     <SafeAreaView className="flex-1">
       <ScrollView className="flex-1 p-4">
         <View className="p-4 bg-white rounded-lg  border border-gray-200 mb-4">
           <Text className="text-base mb-2">기본 정보</Text>
-          <InputBox
-            label="품목 이름"
-            value={maintenanceItem.name}
-            onChangeText={(nextValue) => onChangeInput("name", nextValue)}
-          />
           <Select
             label="카테고리"
             selectedIndex={selectedIndex}
@@ -184,45 +175,48 @@ export default function MaintenanceItemFormScreen() {
               <SelectItem key={option.value} title={option.label} />
             ))}
           </Select>
-        </View>
-        <View className="p-4 bg-white rounded-lg  border border-gray-200">
-          <Text className="text-base mb-2">교체 주기 설정</Text>
-          <InputBox
-            label="교체 주기 (km)"
-            value={maintenanceItem.replacementKm?.toString()}
-            onChangeText={(nextValue) =>
-              onChangeInput("replacementKm", nextValue)
-            }
-          />
-          <Toggle
-            checked={maintenanceItem.kmAlarm}
-            onChange={() =>
-              onCheckedChange({
-                checkedType: "kmAlarm",
-                checked: !maintenanceItem.kmAlarm,
-              })
-            }
-          >
-            교체 주기 (km) 알림
-          </Toggle>
-          <InputBox
-            label="교체 주기 (일)"
-            value={maintenanceItem.replacementCycle?.toString()}
-            onChangeText={(nextValue) =>
-              onChangeInput("replacementCycle", nextValue)
-            }
-          />
-          <Toggle
-            checked={maintenanceItem.cycleAlarm}
-            onChange={() =>
-              onCheckedChange({
-                checkedType: "cycleAlarm",
-                checked: !maintenanceItem.cycleAlarm,
-              })
-            }
-          >
-            교체 주기 (일) 알림
-          </Toggle>
+          <View className="flex-row justify-between items-center mt-2">
+            <InputBox
+              className="flex-1 mr-2"
+              label="교체 주기 (km)"
+              value={maintenanceItem.replacementKm?.toString()}
+              onChangeText={(nextValue) =>
+                onChangeInput("replacementKm", nextValue)
+              }
+            />
+            <Toggle
+              checked={maintenanceItem.kmAlarm}
+              onChange={() =>
+                onCheckedChange({
+                  checkedType: "kmAlarm",
+                  checked: !maintenanceItem.kmAlarm,
+                })
+              }
+            >
+              알림
+            </Toggle>
+          </View>
+          <View className="flex-row justify-between items-center mt-2">
+            <InputBox
+              className="flex-1 mr-2"
+              label="교체 주기 (월)"
+              value={maintenanceItem.replacementCycle?.toString()}
+              onChangeText={(nextValue) =>
+                onChangeInput("replacementCycle", nextValue)
+              }
+            />
+            <Toggle
+              checked={maintenanceItem.cycleAlarm}
+              onChange={() =>
+                onCheckedChange({
+                  checkedType: "cycleAlarm",
+                  checked: !maintenanceItem.cycleAlarm,
+                })
+              }
+            >
+              알림
+            </Toggle>
+          </View>
         </View>
         {isEditMode && (
           <Button label="삭제" color="secondary" onPress={onDelete} />
