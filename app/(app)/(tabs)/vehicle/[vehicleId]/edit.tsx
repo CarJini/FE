@@ -1,4 +1,4 @@
-import { ScrollView, SafeAreaView, View } from "react-native";
+import { ScrollView, SafeAreaView, View, TextInput } from "react-native";
 import { Button, Card, InputBox } from "@/src/components";
 import { useRoute } from "@react-navigation/native";
 import { toNumber, replacePathParams } from "@/src/utils";
@@ -10,6 +10,22 @@ import { useVehicleStore } from "@/src/store";
 
 const skipInputNames = ["id"];
 const readOnlyNames = ["image", "brand", "model"];
+
+const displayNameMap: Record<string, string> = {
+  brand: "브랜드",
+  model: "모델명",
+  image: "이미지 URL",
+  startDate: "시작일",
+  startKm: "시작 주행거리",
+  nowKm: "현재 주행거리",
+};
+
+function getKeyboardType(value: any): "default" | "numeric" | "url" {
+  if (typeof value === "number") return "numeric";
+  if (typeof value === "string" && value.startsWith("http")) return "url";
+  return "default";
+}
+
 export default function VehicleEditScreen() {
   const myVehicles = useVehicleStore((state) => state.myVehicles);
   const vehicleModels = useVehicleStore((state) => state.vehicleModels);
@@ -30,15 +46,7 @@ export default function VehicleEditScreen() {
 
   async function onSave() {
     if (!vehicleData) return;
-    console.log("save", {
-      vehicleModels,
-      vehicleData,
-      find: vehicleModels.find(
-        (vehicle) =>
-          vehicle.brand === vehicleData.brand &&
-          vehicle.model === vehicleData.model
-      ),
-    });
+
     const carId = vehicleModels.find(
       (vehicle) =>
         vehicle.brand === vehicleData.brand &&
@@ -48,8 +56,9 @@ export default function VehicleEditScreen() {
       console.error("Car ID not found");
       return;
     }
+
+    const { method, url } = API_ENDPOINTS.VEHICLE.UPDATE;
     try {
-      const { method, url } = API_ENDPOINTS.VEHICLE.UPDATE;
       const res = await apiClient.request({
         method,
         url: replacePathParams(url, {
@@ -73,8 +82,8 @@ export default function VehicleEditScreen() {
   async function onDelete() {
     if (!vehicleData) return;
 
+    const { method, url } = API_ENDPOINTS.VEHICLE.DELETE;
     try {
-      const { method, url } = API_ENDPOINTS.VEHICLE.DELETE;
       const res = await apiClient.request({
         method,
         url: replacePathParams(url, {
@@ -119,15 +128,18 @@ export default function VehicleEditScreen() {
                   skipInputNames.includes(key) ||
                   value === undefined ||
                   value === null
-                )
+                ) {
                   return null;
+                }
+
                 return (
                   <InputBox
                     key={key}
-                    label={key}
+                    label={displayNameMap[key] || key}
                     value={value.toString()}
                     onChangeText={(value) => onChangeInput(key, value)}
                     readOnly={readOnlyNames.includes(key)}
+                    keyboardType={getKeyboardType(value)}
                   />
                 );
               })}
