@@ -1,10 +1,12 @@
-import { MaintenanceItemResponse } from "@/src/types";
+import {
+  MaintenanceItemCategoryOptions,
+  MaintenanceItemResponse,
+} from "@/src/types";
 import {
   Divider,
   ProgressBar as KittenProgressBar,
 } from "@ui-kitten/components";
 import { View, Text } from "react-native";
-import { differenceInDays } from "date-fns/fp";
 
 export function MaintenanceItemStatus({
   vehicleNowKm,
@@ -13,16 +15,19 @@ export function MaintenanceItemStatus({
   vehicleNowKm: number;
   item: MaintenanceItemResponse;
 }) {
+  const category = MaintenanceItemCategoryOptions.find(
+    (c) => c.value === item.category
+  )?.label;
   const kmProgress = item.kmProgress ?? 0;
-  const elapsedTime = item.remainingDay - item.replacementCycle;
+  const elapsedTime = item.replacementCycle * 30 - item.remainingDay;
   return (
     <View className="p-2">
-      <Text className="text-lg font-bold mb-2">{item.name}</Text>
+      <Text className="text-lg font-bold mb-2">{category}</Text>
       <ProgressBar
         progressTitle="주행거리 주기"
         progress={kmProgress}
-        nowText={`${vehicleNowKm.toLocaleString()} Km`}
-        remainingText={`${item.remainingKm?.toLocaleString()} Km`}
+        nowText={`${vehicleNowKm.toLocaleString()}km`}
+        replacementText={`${item.replacementKm?.toLocaleString()} km`}
       />
       {item.dayProgress !== undefined &&
         item.replacementCycle !== undefined && (
@@ -31,8 +36,8 @@ export function MaintenanceItemStatus({
             <ProgressBar
               progressTitle="기간 주기"
               progress={item.dayProgress}
-              nowText={`${elapsedTime}일 경과`}
-              remainingText={`${item.replacementCycle?.toString()} 일`}
+              nowText={`${elapsedTime}일`}
+              replacementText={`${item.replacementCycle}개월`}
             />
           </>
         )}
@@ -44,45 +49,67 @@ function ProgressBar({
   progressTitle,
   progress,
   nowText,
-  remainingText,
+  replacementText,
 }: {
   progressTitle: string;
   progress: number;
   nowText: string;
-  remainingText: string;
+  replacementText: string;
 }) {
+  const status = getStatus(progress / 100);
+  const statusColor = getStatusColor(status);
   return (
-    <View className="flex-column">
+    <View className="flex-column gap-y-1">
       <View className="flex-row items-center justify-between mb-1">
-        <Text className="text-sm font-bold text-gray-800 opacity-50">
+        <Text className="text-sm font-bold text-gray-900 opacity-50">
           {progressTitle}
         </Text>
         <View
-          className="px-1 rounded-full"
-          style={[{ backgroundColor: getStatusColor(progress / 100) }]}
+          style={{ backgroundColor: getStatusColor(status, 0.2) }}
+          className="px-2 rounded-full"
         >
-          <Text className="text-white text-xs font-bold text-center">
+          <Text
+            className="text-xs font-bold text-center"
+            style={{ color: statusColor }}
+          >
             {progress}%
           </Text>
         </View>
       </View>
-      <KittenProgressBar progress={progress / 100} size="medium" />
-      <View className="flex-row justify-between">
-        <Text className="text-sm text-gray-800">{nowText}</Text>
-        <Text className="text-sm text-gray-800">{remainingText}</Text>
+      <KittenProgressBar
+        progress={progress / 100}
+        size="large"
+        status={status === "normal" ? "primary" : status}
+      />
+      <View className="flex-row justify-between items-center">
+        <Text className="text-sm" style={{ color: statusColor }}>
+          <Text className="font-bold">{nowText}</Text> 경과
+        </Text>
+
+        <Text className="text-sm text-gray-600">{replacementText}</Text>
       </View>
     </View>
   );
 }
 
-// status가 아닌 거리 기반으로 0.75 이상이면 예정, 1.0 이상이면 필요 이왼 정상
-const getStatusColor = (progress: number) => {
+function getStatus(progress: number) {
   switch (true) {
     case progress >= 1.0:
-      return "#FF3B30";
+      return "danger";
     case progress > 0.75:
-      return "#FF9500";
+      return "warning";
     default:
-      return "#34C759";
+      return "normal";
   }
-};
+}
+
+function getStatusColor(status: "danger" | "warning" | "normal", alpha = 1) {
+  switch (status) {
+    case "danger":
+      return `rgba(255, 61, 113, ${alpha})`;
+    case "warning":
+      return `rgba(255, 170, 0, ${alpha})`;
+    default:
+      return `rgba(51, 102, 255, ${alpha})`;
+  }
+}
