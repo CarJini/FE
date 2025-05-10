@@ -2,6 +2,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { API_ENDPOINTS } from "./apiEndpoints";
+import { useAuthStore } from "../store";
 
 export const baseURL = "https://api.carjini.shop";
 
@@ -27,7 +28,7 @@ apiClient.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem("accessToken");
     if (token) {
-      console.warn(token);
+      console.warn("interceptors 🔥🔥🔥", token);
       config.headers.Authorization = `Bearer ${token}`;
     }
 
@@ -40,13 +41,8 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 apiClient.interceptors.response.use(
   (res) => res,
   async (error) => {
-    await delay(8000);
+    await delay(10000);
     const originalRequest = error.config;
-    console.log("originalRequest.url>>>>>>>", {
-      url: originalRequest.url,
-      retry: originalRequest._retry,
-    });
-
     const { method, url: tokenRefreshUrl } = API_ENDPOINTS.AUTH.REFRESH_TOKEN;
 
     // 무한루프 방지
@@ -61,12 +57,11 @@ apiClient.interceptors.response.use(
     originalRequest._retry = true;
     try {
       const refreshToken = await AsyncStorage.getItem("refreshToken");
-      console.warn("refreshToken", refreshToken);
       if (!refreshToken) {
-        console.log("Refresh token not found. Redirecting to login.");
-        await AsyncStorage.multiRemove(["accessToken", "refreshToken", "user"]);
+        console.warn("Refresh token not found. Redirecting to login.");
+        await useAuthStore.getState().signOut();
         router.replace("/(auth)/login");
-        return Promise.reject(new Error("No refresh token")); // ✅ 이걸로 끝냄
+        return;
       }
 
       const response = await refreshClient.request({

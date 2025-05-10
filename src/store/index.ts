@@ -1,3 +1,5 @@
-export { useMaintenanceHistoryStore } from "./maintenance";
+export { useMaintenanceHistoryStore } from "./useMaintenanceHistoryStore";
 
-export { useVehicleStore } from "./vehicle";
+export { useVehicleStore } from "./useVehicleStore";
+
+export { useAuthStore } from "./useAuthStore";

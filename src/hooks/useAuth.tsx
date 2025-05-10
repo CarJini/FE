@@ -12,10 +12,13 @@ import { AuthContextType, User } from "@/src/types";
 import { Platform } from "react-native";
 import { baseURL, apiClient } from "../services/api";
 import { API_ENDPOINTS } from "../services/apiEndpoints";
+import { useAuthStore } from "../store";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const user = useAuthStore((state) => state.user);
+  const setUser = useAuthStore((state) => state.setUser);
+
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -67,12 +70,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (accessToken && userJson) {
         setUser(JSON.parse(userJson));
       } else if (accessToken) {
-        await fetchUserInfo(accessToken);
+        await fetchUserInfo();
       }
     } catch (e) {
       console.error("Failed to load auth info", e);
     } finally {
-      console.log("check auth status complete user:", user);
       setIsLoading(false);
     }
   }
@@ -98,13 +100,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await AsyncStorage.setItem("accessToken", accessToken);
       await AsyncStorage.setItem("refreshToken", refreshToken);
-      await fetchUserInfo(accessToken);
+      await fetchUserInfo();
     } catch (e) {
       console.error("Error handling redirect URL", e);
     }
   }
 
-  async function fetchUserInfo(accessToken: string) {
+  async function fetchUserInfo() {
     try {
       const { method, url } = API_ENDPOINTS.USER.PROFILE;
       const userResponse = await apiClient.request({ method, url });
@@ -144,6 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         isAuthenticated: Boolean(user),
+        hasUser: Boolean(user),
         isLoading,
         signInWithGoogle,
         signOut,
