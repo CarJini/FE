@@ -1,20 +1,3 @@
-// export type MaintenanceItemStatusType = "danger" | "good" | "warning";
-
-// export type MaintenanceItem = {
-//   id: number;
-//   name: string;
-//   category: MaintenanceItemCategoryType;
-//   cycleAlarm?: boolean;
-//   replacementKm?: number;
-//   replacementCycle?: number;
-//   kmAlarm?: boolean;
-//   status: MaintenanceItemStatusType;
-//   remainingKm?: number;
-//   remainingDay?: number;
-//   kmProgress?: number;
-//   dayProgress?: number;
-// };
-
 export type MaintenanceItemStatusType = "예상" | "점검 필요" | "정상";
 export type MaintenanceItemCategoryType =
   | "ENGINE_OIL"
