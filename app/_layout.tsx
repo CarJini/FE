@@ -10,6 +10,9 @@ import { EvaIconsPack } from "@ui-kitten/eva-icons";
 import { useFonts } from "expo-font";
 import { AuthProvider, useAuth } from "@/src/hooks";
 
+import Toast from "react-native-toast-message";
+import { toastConfig } from "@/src/components";
+
 SplashScreen.preventAutoHideAsync();
 
 function AuthRedirect() {
@@ -58,6 +61,7 @@ export default function RootLayout() {
           <AuthRedirect />
         </AuthProvider>
       </ApplicationProvider>
+      <Toast config={toastConfig} />
     </>
   );
 }
