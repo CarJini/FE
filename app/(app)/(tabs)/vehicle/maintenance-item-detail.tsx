@@ -15,7 +15,7 @@ import { API_ENDPOINTS } from "@/src/services/apiEndpoints";
 import { apiClient } from "@/src/services/api";
 import { replacePathParams } from "@/src/utils";
 import { useMaintenanceParams } from "@/src/hooks";
-import { useMaintenanceHistoryStore } from "@/src/store/maintenance";
+import { useMaintenanceHistoryStore } from "@/src/store/useMaintenanceHistoryStore";
 import { useVehicleStore } from "@/src/store";
 import { format } from "date-fns";
 

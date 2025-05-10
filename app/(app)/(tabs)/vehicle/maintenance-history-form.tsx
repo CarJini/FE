@@ -7,7 +7,7 @@ import { apiClient } from "@/src/services/api";
 import { MaintenanceHistory } from "@/src/types";
 import { replacePathParams } from "@/src/utils";
 import { useMaintenanceParams } from "@/src/hooks";
-import { useMaintenanceHistoryStore } from "@/src/store/maintenance";
+import { useMaintenanceHistoryStore } from "@/src/store/useMaintenanceHistoryStore";
 import Toast from "react-native-toast-message";
 
 // 정비 이력 등록/수정
