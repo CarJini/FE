@@ -18,15 +18,15 @@ export function MaintenanceItemStatus({
   const category = MaintenanceItemCategoryOptions.find(
     (c) => c.value === item.category
   )?.label;
-  const kmProgress = item.kmProgress ?? 0;
+  const elapsedKm = item.replacementKm - item.remainingKm;
   const elapsedTime = item.replacementCycle * 30 - item.remainingDay;
   return (
     <View className="p-2">
       <Text className="text-lg font-bold mb-2">{category}</Text>
       <ProgressBar
         progressTitle="주행거리 주기"
-        progress={kmProgress}
-        nowText={`${vehicleNowKm.toLocaleString()}km`}
+        progress={item.kmProgress ?? 0}
+        nowText={`${elapsedKm.toLocaleString()}km`}
         replacementText={`${item.replacementKm?.toLocaleString()} km`}
       />
       {item.dayProgress !== undefined &&

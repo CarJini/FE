@@ -1,6 +1,6 @@
-import { ScrollView, SafeAreaView, Text, View } from "react-native";
+import { ScrollView, SafeAreaView, Platform } from "react-native";
 import { useState } from "react";
-import { Button, InputBox } from "@/src/components";
+import { Button, Card, DateInput, InputBox } from "@/src/components";
 import { useRouter } from "expo-router";
 import { API_ENDPOINTS } from "@/src/services/apiEndpoints";
 import { apiClient } from "@/src/services/api";
@@ -8,8 +8,11 @@ import { MaintenanceHistory } from "@/src/types";
 import { replacePathParams } from "@/src/utils";
 import { useMaintenanceParams } from "@/src/hooks";
 import { useMaintenanceHistoryStore } from "@/src/store/maintenance";
+import Toast from "react-native-toast-message";
 
+// 정비 이력 등록/수정
 export default function MaintenanceHistoryFormScreen() {
+  const router = useRouter();
   const {
     vehicleId,
     itemId: maintenanceItemId,
@@ -25,23 +28,34 @@ export default function MaintenanceHistoryFormScreen() {
             replacementKm: history.replacementKm,
           }
         : {
-            replacementDate: "",
+            replacementDate: new Date(),
             replacementKm: 0,
           }
     );
-  const router = useRouter();
 
-  function onChangeInput(
-    field: keyof MaintenanceHistory,
-    value: string | number | boolean
-  ) {
+  function onChangeInput(value: number) {
     setMaintenanceHistory((prev) => ({
       ...prev,
-      [field]: value,
+      replacementKm: value,
+    }));
+  }
+
+  function onDateChange(date: Date) {
+    setMaintenanceHistory((prev) => ({
+      ...prev,
+      replacementDate: date,
     }));
   }
 
   async function onSave() {
+    if (maintenanceHistory.replacementKm <= 0) {
+      Toast.show({
+        type: "error",
+        text1: "주행 거리를 입력하세요.",
+        position: "bottom",
+      });
+      return;
+    }
     const carOwnerId = vehicleId.toString();
     let method: string;
     let url: string;
@@ -67,7 +81,16 @@ export default function MaintenanceHistoryFormScreen() {
         url: finalUrl,
         data: maintenanceHistory,
       });
-      router.push(`/vehicle/${vehicleId}/maintenance/${maintenanceItemId}`);
+
+      Toast.show({
+        type: "success",
+        text1: isEditMode ? "저장 완료" : "추가 완료",
+        position: "bottom",
+      });
+
+      router.replace(
+        `/vehicle/maintenance-item-detail?vehicleId=${vehicleId}&itemId=${maintenanceItemId}`
+      );
     } catch (error) {
       console.error("Error saving maintenance item:", error);
     }
@@ -86,7 +109,16 @@ export default function MaintenanceHistoryFormScreen() {
           id: historyId.toString(),
         }),
       });
-      router.push(`/vehicle/${vehicleId}/maintenance/${maintenanceItemId}`);
+
+      Toast.show({
+        type: "success",
+        text1: "삭제 완료",
+        position: "bottom",
+      });
+
+      router.replace(
+        `/vehicle/maintenance-item-detail?vehicleId=${vehicleId}&itemId=${maintenanceItemId}`
+      );
     } catch (error) {
       console.error("Error deleting maintenance item:", error);
     }
@@ -95,27 +127,28 @@ export default function MaintenanceHistoryFormScreen() {
   return (
     <SafeAreaView className="flex-1">
       <ScrollView className="flex-1 p-4">
-        <View className="p-4 bg-white rounded-lg  border border-gray-200 mb-4">
-          <Text className="text-base mb-2">정비 이력</Text>
-          <InputBox
-            label="교체 날짜"
-            value={maintenanceHistory.replacementDate}
-            onChangeText={(nextValue) =>
-              onChangeInput("replacementDate", nextValue)
-            }
+        <Card>
+          <DateInput
+            label="정비 날짜"
+            date={maintenanceHistory.replacementDate}
+            onChange={onDateChange}
           />
           <InputBox
             label="누적 주행 거리(km)"
             value={maintenanceHistory.replacementKm.toString()}
             onChangeText={(nextValue) =>
-              onChangeInput("replacementKm", nextValue)
+              onChangeInput(nextValue.trim() === "" ? 0 : parseInt(nextValue))
             }
+            keyboardType={Platform.select({
+              ios: "decimal-pad",
+              android: "numeric",
+            })}
           />
-        </View>
-        {isEditMode && (
-          <Button label="삭제" color="secondary" onPress={onDelete} />
-        )}
-        <Button label={isEditMode ? "저장" : "추가"} onPress={onSave} />
+          {isEditMode && (
+            <Button label="삭제" color="secondary" onPress={onDelete} />
+          )}
+          <Button label={isEditMode ? "저장" : "추가"} onPress={onSave} />
+        </Card>
       </ScrollView>
     </SafeAreaView>
   );

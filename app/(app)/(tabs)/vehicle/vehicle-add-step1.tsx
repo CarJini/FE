@@ -5,6 +5,7 @@ import { SafeAreaView, ScrollView, Text } from "react-native";
 import { VehicleModel } from "@/src/types";
 import { useEffect } from "react";
 import { useVehicleStore } from "@/src/store";
+import { useSafeBackRedirect } from "@/src/hooks";
 
 type VehicleMaker = {
   brand: string;
@@ -18,13 +19,15 @@ export default function VehicleAddStep1Screen() {
   const updateVehicleData = useVehicleStore((state) => state.updateVehicleData);
   const vehicleModels = useVehicleStore((state) => state.vehicleModels);
 
+  useSafeBackRedirect("/vehicle/vehicle-list");
+
   useEffect(() => {
     fetchCarModels();
   }, []);
 
   function onClickMaker(maker: string) {
     updateVehicleData({ ...vehicleData, maker });
-    router.push("/vehicle/add/step2");
+    router.push("/vehicle/vehicle-add-step2");
   }
 
   const vehicleMakers: VehicleMaker[] = [];

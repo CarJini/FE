@@ -21,7 +21,7 @@ type Message = {
   createdAt?: Date;
 };
 
-export default function ChatBotScreen() {
+export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>([
     {
       message: "안녕하세요! 카지니 챗봇입니다. 어떤 도움이 필요하신가요?",

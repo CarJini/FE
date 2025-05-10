@@ -6,17 +6,18 @@ import {
   SafeAreaView,
   Pressable,
   Image,
+  RefreshControl,
 } from "react-native";
 import { MaintenanceItemStatus } from "@/src/components/vehicle";
 import { Button } from "@/src/components";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import {
   MaintenanceItemResponse,
   MaintenanceItemStatusType,
   VehicleModel,
 } from "@/src/types";
-import { useEffect, useState } from "react";
+import { useCallback, useLayoutEffect, useState } from "react";
 import {
   Tab,
   TabBar,
@@ -32,7 +33,8 @@ const statusMap: Record<MaintenanceItemStatusType, string> = {
   예상: "예상",
 };
 
-export default function VehicleScreen() {
+// 차량 관리
+export default function VehicleListScreen() {
   const myVehicles = useVehicleStore((state) => state.myVehicles);
   const fetchMyVehicles = useVehicleStore((state) => state.fetchMyVehicles);
   const maintenanceItemsByVehicle = useVehicleStore(
@@ -44,6 +46,7 @@ export default function VehicleScreen() {
   const [selectedStatusByVehicle, setSelectedStatusByVehicle] = useState<
     Record<number, number>
   >({});
+
   function onSelectStatus(vehicleId: number, statusIndex: number) {
     setSelectedStatusByVehicle((prev) => ({
       ...prev,
@@ -51,25 +54,36 @@ export default function VehicleScreen() {
     }));
   }
 
-  useEffect(() => {
-    fetchMyVehicles();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchMyVehicles();
+    }, [])
+  );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     myVehicles.forEach((vehicle) => {
-      if (maintenanceItemsByVehicle[vehicle.id] == null) {
-        fetchMaintenanceItems(vehicle.id);
-      }
+      fetchMaintenanceItems(vehicle.id);
     });
   }, [myVehicles]);
 
   function onClickAddVehicle() {
-    router.push("/vehicle/add/step1");
+    router.push("/vehicle/vehicle-add-step1");
   }
 
   return (
-    <SafeAreaView className="flex-1">
-      <ScrollView className="flex-1 min-h-full">
+    <SafeAreaView className="flex-1 justify-center">
+      <ScrollView
+        className="flex-1 min-h-full"
+        contentContainerStyle={{ flexGrow: 1 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={false}
+            onRefresh={() => {
+              fetchMyVehicles();
+            }}
+          />
+        }
+      >
         {myVehicles.map((vehicle) => (
           <VehicleCard
             key={vehicle.id}
@@ -80,7 +94,7 @@ export default function VehicleScreen() {
           />
         ))}
         {myVehicles.length === 0 && (
-          <View className="items-center justify-center">
+          <View className="flex-1 items-center justify-center">
             <View className="w-[80px] h-[80px] rounded-lg bg-slate-300 justify-center items-center mb-4">
               <Ionicons name="car" size={32} />
             </View>
@@ -115,15 +129,17 @@ function VehicleCard({
   onSelectStatus: (index: number) => void;
 }) {
   function onClickVehicle() {
-    router.push(`/vehicle/${vehicle.id}/edit`);
+    router.push(`/vehicle/vehicle-edit?vehicleId=${vehicle.id}`);
   }
 
   function onClickMaintenanceItems() {
-    router.push(`/vehicle/${vehicle.id}/maintenance/items`);
+    router.push(`/vehicle/maintenance-items?vehicleId=${vehicle.id}`);
   }
 
   function onClickMaintenanceItem(item: MaintenanceItemResponse) {
-    router.push(`/vehicle/${vehicle.id}/maintenance/${item.id}`);
+    router.push(
+      `/vehicle/maintenance-item-detail?vehicleId=${vehicle.id}&itemId=${item.id}`
+    );
   }
 
   const itemStatusCount = maintenanceItems.reduce(
@@ -168,7 +184,7 @@ function VehicleCard({
         </View>
       </Pressable>
 
-      <View className="bg-white rounded-lg p-4 border border-gray-200 mt-4">
+      <View className="bg-white rounded-lg p-4 border border-gray-200 mt-2">
         <View className="flex-row items-center justify-between mb-3">
           <Text className="text-lg font-bold">차량 정비 현황</Text>
           <Pressable className="" onPress={onClickMaintenanceItems}>

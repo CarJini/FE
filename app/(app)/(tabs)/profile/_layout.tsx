@@ -10,16 +10,9 @@ export default function ProfileLayout() {
       }}
     >
       <Stack.Screen
-        name="index"
+        name="user-profile"
         options={{
           title: "프로필",
-          headerShown: true,
-        }}
-      />
-      <Stack.Screen
-        name="[id]"
-        options={{
-          title: "유저 상세",
           headerShown: true,
         }}
       />

@@ -10,7 +10,7 @@ import React from "react";
 import { Card, MenuButton } from "@/src/components";
 import { useAuth } from "@/src/hooks";
 
-export default function ProfileScreen() {
+export default function UserProfileScreen() {
   const { user, signOut } = useAuth();
   return (
     <SafeAreaView className="flex-1">

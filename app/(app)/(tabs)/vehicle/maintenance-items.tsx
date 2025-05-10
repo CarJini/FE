@@ -1,12 +1,21 @@
-import { ScrollView, SafeAreaView, Text, View, Pressable } from "react-native";
+import {
+  ScrollView,
+  SafeAreaView,
+  Text,
+  View,
+  Pressable,
+  RefreshControl,
+} from "react-native";
 import { Button } from "@/src/components";
-import { useRoute } from "@react-navigation/native";
 import { MaintenanceItemStatus } from "@/src/components/vehicle";
-import { router } from "expo-router";
-import { useEffect } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback } from "react";
 import { useVehicleStore } from "@/src/store";
+import { useMaintenanceParams } from "@/src/hooks";
 
+// 차량 정비 현황
 export default function MaintenanceItemsScreen() {
+  const { vehicleId } = useMaintenanceParams();
   const myVehicles = useVehicleStore((state) => state.myVehicles);
   const maintenanceItemsByVehicle = useVehicleStore(
     (state) => state.maintenanceItemsByVehicle
@@ -14,26 +23,25 @@ export default function MaintenanceItemsScreen() {
   const fetchMaintenanceItems = useVehicleStore(
     (state) => state.fetchMaintenanceItems
   );
-  const route = useRoute();
-  const params = route.params as { vehicleId: string };
-  const vehicleId = Number(params.vehicleId);
   const vehicleInfo = myVehicles.find((vehicle) => vehicle.id === vehicleId);
 
-  useEffect(() => {
-    if (
-      !maintenanceItemsByVehicle[vehicleId] ||
-      maintenanceItemsByVehicle[vehicleId].length === 0
-    ) {
+  useFocusEffect(
+    useCallback(() => {
+      if (!vehicleId) return;
       fetchMaintenanceItems(vehicleId);
-    }
-  }, [vehicleId]);
+    }, [])
+  );
 
-  function onAddMaintenance() {
-    router.push(`/vehicle/${vehicleId}/maintenance/form?mode=add`);
+  function onAddMaintenanceItem() {
+    router.push(
+      `/vehicle/maintenance-item-form?mode=add&vehicleId=${vehicleId}`
+    );
   }
 
-  function onClickMaintenanceItem(itemId: number) {
-    router.push(`/vehicle/${vehicleId}/maintenance/${itemId}?mode=edit`);
+  function onClickDetail(itemId: number) {
+    router.push(
+      `/vehicle/maintenance-item-detail?mode=edit&vehicleId=${vehicleId}&itemId=${itemId}`
+    );
   }
 
   if (!vehicleInfo) {
@@ -42,8 +50,19 @@ export default function MaintenanceItemsScreen() {
 
   return (
     <SafeAreaView className="flex-1">
-      <ScrollView className="flex-1">
-        <View className="p-4">
+      <ScrollView
+        className="flex-1 min-h-full"
+        contentContainerStyle={{ flexGrow: 1 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={false}
+            onRefresh={() => {
+              fetchMaintenanceItems(vehicleId);
+            }}
+          />
+        }
+      >
+        <View className="p-4 min-h-full">
           <Text className="text-xl font-bold">
             {vehicleInfo.model} 차량 정비 현황
           </Text>
@@ -52,15 +71,17 @@ export default function MaintenanceItemsScreen() {
             이력을 확인할 수 있습니다.
           </Text>
           {maintenanceItemsByVehicle[vehicleId]?.length === 0 && (
-            <Text className="text-sm text-gray-500 text-center">
-              등록된 정비 항목이 없습니다.
-            </Text>
+            <View className="flex-1 justify-center items-center">
+              <Text className="text-sm text-gray-500 text-center">
+                등록된 정비 항목이 없습니다.
+              </Text>
+            </View>
           )}
           {maintenanceItemsByVehicle[vehicleId]?.map((item, idx) => (
             <Pressable
               key={item.id}
               className="p-2 bg-white active:bg-gray-200 rounded-xl border border-gray-200 my-2"
-              onPress={() => onClickMaintenanceItem(item.id)}
+              onPress={() => onClickDetail(item.id)}
             >
               <MaintenanceItemStatus
                 vehicleNowKm={vehicleInfo.nowKm}
@@ -69,7 +90,7 @@ export default function MaintenanceItemsScreen() {
             </Pressable>
           ))}
           <View className="w-full">
-            <Button label="새 정비 품목 추가" onPress={onAddMaintenance} />
+            <Button label="새 정비 품목 추가" onPress={onAddMaintenanceItem} />
           </View>
         </View>
       </ScrollView>

@@ -1,12 +1,11 @@
-import { ScrollView, SafeAreaView, Text, View } from "react-native";
+import { SafeAreaView, Text, View } from "react-native";
 import { useState, useEffect } from "react";
 import {
   MaintenanceItemRequest,
   MaintenanceItemCategoryOptions,
 } from "@/src/types";
-import { Button, InputBox } from "@/src/components";
+import { Button, Card, InputBox } from "@/src/components";
 import { useRouter } from "expo-router";
-import { IndexPath, Select, SelectItem, Toggle } from "@ui-kitten/components";
 import {
   MaintenanceItemCategoryType,
   MaintenanceItemResponse,
@@ -19,7 +18,11 @@ import {
 } from "@/src/utils";
 import { useMaintenanceParams } from "@/src/hooks";
 import { useVehicleStore } from "@/src/store";
+import { Toggle } from "@ui-kitten/components";
+import DropDownPicker from "react-native-dropdown-picker";
+import Toast from "react-native-toast-message";
 
+// 정비 품목 등록/수정
 export default function MaintenanceItemFormScreen() {
   const { isEditMode, vehicleId, itemId } = useMaintenanceParams();
   const maintenanceItemsByVehicle = useVehicleStore(
@@ -28,6 +31,11 @@ export default function MaintenanceItemFormScreen() {
   const fetchMaintenanceItems = useVehicleStore(
     (state) => state.fetchMaintenanceItems
   );
+
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [categoryItems, setCategoryItems] = useState([
+    ...MaintenanceItemCategoryOptions,
+  ]);
 
   const router = useRouter();
   const [maintenanceItem, setMaintenanceItem] =
@@ -41,7 +49,6 @@ export default function MaintenanceItemFormScreen() {
     const foundItem = maintenanceItemsByVehicle[vehicleId]?.find(
       (i) => i.id === itemId
     );
-    if (isEditMode && !foundItem) return;
 
     const initialItem = foundItem
       ? mapMaintenanceResponseToRequest(foundItem)
@@ -70,21 +77,6 @@ export default function MaintenanceItemFormScreen() {
     return null;
   }
 
-  const selectedIndex = new IndexPath(
-    MaintenanceItemCategoryOptions.findIndex(
-      (option) => option.value === selectedItem.value
-    )
-  );
-
-  function onSelectCategory(index: IndexPath | IndexPath[]) {
-    const selectedIndex = Array.isArray(index) ? index[0] : index;
-    setSelectedItem(MaintenanceItemCategoryOptions[selectedIndex.row]);
-    setMaintenanceItem((prev) => ({
-      ...prev!,
-      category: MaintenanceItemCategoryOptions[selectedIndex.row].value,
-    }));
-  }
-
   function onChangeInput(
     field: keyof MaintenanceItemResponse,
     value: string | number | boolean
@@ -110,6 +102,19 @@ export default function MaintenanceItemFormScreen() {
 
   async function onSave() {
     if (!maintenanceItem) return;
+    if (
+      Number(maintenanceItem.replacementKm) === 0 ||
+      Number(maintenanceItem.replacementCycle) === 0
+    ) {
+      Toast.show({
+        type: "error",
+        text1: "추가 실패",
+        text2: "교체 주기(km, 개월)은 0보다 커야합니다.",
+        position: "bottom",
+      });
+      return;
+    }
+
     let method: string;
     let url: string;
     let finalUrl: string;
@@ -132,8 +137,14 @@ export default function MaintenanceItemFormScreen() {
         url: finalUrl,
         data: maintenanceItem,
       });
-      fetchMaintenanceItems(vehicleId);
-      router.push(`/vehicle/${vehicleId}/maintenance/items`);
+
+      Toast.show({
+        type: "success",
+        text1: isEditMode ? "저장 완료" : "추가 완료",
+        position: "bottom",
+      });
+
+      router.replace(`/vehicle/maintenance-items?vehicleId=${vehicleId}`);
     } catch (error) {
       console.error("Error saving maintenance item:", error);
     }
@@ -149,8 +160,14 @@ export default function MaintenanceItemFormScreen() {
           id: itemId.toString(),
         }),
       });
-      fetchMaintenanceItems(vehicleId);
-      router.push(`/vehicle/${vehicleId}/maintenance/items`);
+
+      Toast.show({
+        type: "success",
+        text1: "삭제 완료",
+        position: "bottom",
+      });
+
+      router.replace(`/vehicle/maintenance-items?vehicleId=${vehicleId}`);
     } catch (error) {
       console.error("Error deleting maintenance item:", error);
     }
@@ -162,67 +179,95 @@ export default function MaintenanceItemFormScreen() {
 
   return (
     <SafeAreaView className="flex-1">
-      <ScrollView className="flex-1 p-4">
-        <View className="p-4 bg-white rounded-lg  border border-gray-200 mb-4">
+      <View className="p-4">
+        <Card>
           <Text className="text-base mb-2">기본 정보</Text>
-          <Select
-            label="카테고리"
-            selectedIndex={selectedIndex}
-            value={selectedItem ? selectedItem.label : "카테고리를 선택하세요."}
-            onSelect={onSelectCategory}
-          >
-            {MaintenanceItemCategoryOptions.map((option) => (
-              <SelectItem key={option.value} title={option.label} />
-            ))}
-          </Select>
-          <View className="flex-row justify-between items-center mt-2">
+          <View className="mb-3">
+            <Text className="mb-2 text-sm font-medium text-gray-700">
+              정비 품목
+            </Text>
+            <DropDownPicker
+              placeholder="정비 품목을 선택하세요"
+              open={isPickerOpen}
+              value={maintenanceItem.category}
+              items={categoryItems}
+              setOpen={setIsPickerOpen}
+              setValue={(callback) =>
+                setMaintenanceItem((prev) => ({
+                  ...prev!,
+                  category:
+                    typeof callback === "function"
+                      ? callback(prev!.category)
+                      : callback,
+                }))
+              }
+              setItems={setCategoryItems}
+              style={{
+                borderColor: "#D1D5DB",
+                borderWidth: 1,
+                borderRadius: 8,
+              }}
+              dropDownContainerStyle={{
+                borderColor: "#D1D5DB",
+                borderWidth: 1,
+                borderRadius: 8,
+              }}
+            />
+          </View>
+          <View className="flex-row">
             <InputBox
-              className="flex-1 mr-2"
               label="교체 주기 (km)"
               value={maintenanceItem.replacementKm?.toString()}
               onChangeText={(nextValue) =>
                 onChangeInput("replacementKm", nextValue)
               }
+              keyboardType="numeric"
             />
-            <Toggle
-              checked={maintenanceItem.kmAlarm}
-              onChange={() =>
-                onCheckedChange({
-                  checkedType: "kmAlarm",
-                  checked: !maintenanceItem.kmAlarm,
-                })
-              }
-            >
-              알림
-            </Toggle>
+            <View className="ml-5 items-center">
+              <Text className="mb-3 text-sm font-medium text-gray-700">
+                알림
+              </Text>
+              <Toggle
+                checked={maintenanceItem.kmAlarm}
+                onChange={() =>
+                  onCheckedChange({
+                    checkedType: "kmAlarm",
+                    checked: !maintenanceItem.kmAlarm,
+                  })
+                }
+              />
+            </View>
           </View>
-          <View className="flex-row justify-between items-center mt-2">
+          <View className="flex-row">
             <InputBox
-              className="flex-1 mr-2"
-              label="교체 주기 (월)"
+              label="교체 주기 (개월)"
               value={maintenanceItem.replacementCycle?.toString()}
               onChangeText={(nextValue) =>
                 onChangeInput("replacementCycle", nextValue)
               }
+              keyboardType="numeric"
             />
-            <Toggle
-              checked={maintenanceItem.cycleAlarm}
-              onChange={() =>
-                onCheckedChange({
-                  checkedType: "cycleAlarm",
-                  checked: !maintenanceItem.cycleAlarm,
-                })
-              }
-            >
-              알림
-            </Toggle>
+            <View className="ml-5 items-center">
+              <Text className="mb-3 text-sm font-medium text-gray-700">
+                알림
+              </Text>
+              <Toggle
+                checked={maintenanceItem.cycleAlarm}
+                onChange={() =>
+                  onCheckedChange({
+                    checkedType: "cycleAlarm",
+                    checked: !maintenanceItem.cycleAlarm,
+                  })
+                }
+              />
+            </View>
           </View>
-        </View>
-        {isEditMode && (
-          <Button label="삭제" color="secondary" onPress={onDelete} />
-        )}
-        <Button label={isEditMode ? "저장" : "추가"} onPress={onSave} />
-      </ScrollView>
+          {isEditMode && (
+            <Button label="삭제" color="secondary" onPress={onDelete} />
+          )}
+          <Button label={isEditMode ? "저장" : "추가"} onPress={onSave} />
+        </Card>
+      </View>
     </SafeAreaView>
   );
 }

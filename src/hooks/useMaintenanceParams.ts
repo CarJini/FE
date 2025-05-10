@@ -10,9 +10,9 @@ export function useMaintenanceParams() {
   };
 
   return {
-    vehicleId: Number(params.vehicleId),
-    itemId: Number(params.itemId),
-    historyId: params.historyId ? Number(params.historyId) : undefined,
-    isEditMode: params.mode === "edit",
+    vehicleId: Number(params?.vehicleId),
+    itemId: Number(params?.itemId),
+    historyId: params?.historyId ? Number(params?.historyId) : undefined,
+    isEditMode: params?.mode === "edit",
   };
 }

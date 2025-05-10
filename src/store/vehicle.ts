@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { Vehicle, VehicleModel, MaintenanceItemResponseMap } from "../types";
-import { startOfDay } from "date-fns/fp";
 import { cloneDeep } from "lodash";
 import { API_ENDPOINTS } from "../services/apiEndpoints";
 import { apiClient } from "../services/api";
@@ -13,7 +12,7 @@ const initData: Vehicle = {
   model: "",
   nowKm: 0,
   startKm: 0,
-  startDate: startOfDay(new Date()),
+  startDate: new Date(),
   maintenanceItems: [],
 };
 
@@ -59,8 +58,14 @@ export const useVehicleStore = create<VehicleStore>((set) => ({
 
   fetchMyVehicles: async () => {
     const { method, url } = API_ENDPOINTS.VEHICLE.MY_CARS;
-    const res = await apiClient.request({ method, url });
+    const res = await apiClient.request<{ data: VehicleModel[] }>({
+      method,
+      url,
+    });
     if (res.status === 200) {
+      res.data.data.forEach((item) => {
+        item.startDate = new Date(item.startDate);
+      });
       set({ myVehicles: res.data.data });
     }
   },

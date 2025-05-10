@@ -1,6 +1,6 @@
 export type MaintenanceHistory = {
   id?: number;
   maintenanceItemId?: number;
-  replacementDate: string;
+  replacementDate: Date;
   replacementKm: number;
 };

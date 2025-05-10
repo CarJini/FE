@@ -10,63 +10,64 @@ export default function VehicleLayout() {
       }}
     >
       <Stack.Screen
-        name="index"
+        name="vehicle-list"
         options={{
           title: "차량 관리",
           headerShown: true,
+          headerBackVisible: false,
         }}
       />
       <Stack.Screen
-        name="[vehicleId]/edit"
+        name="vehicle-edit"
         options={{
           title: "차량 상세",
           headerShown: true,
         }}
       />
       <Stack.Screen
-        name="[vehicleId]/maintenance/items"
+        name="maintenance-items"
         options={{
           title: "차량 정비현황",
           headerShown: true,
         }}
       />
       <Stack.Screen
-        name="[vehicleId]/maintenance/form"
+        name="maintenance-item-form"
         options={{
           title: "정비 품목 등록/수정",
           headerShown: true,
         }}
       />
       <Stack.Screen
-        name="[vehicleId]/maintenance/[itemId]/index"
+        name="maintenance-item-detail"
         options={{
           title: "정비 품목 상세",
           headerShown: true,
         }}
       />
       <Stack.Screen
-        name="[vehicleId]/maintenance/[itemId]/history-form"
+        name="maintenance-history-form"
         options={{
           title: "정비 이력 등록/수정",
           headerShown: true,
         }}
       />
       <Stack.Screen
-        name="add/step1"
+        name="vehicle-add-step1"
         options={{
           title: "차량 등록",
           headerShown: true,
         }}
       />
       <Stack.Screen
-        name="add/step2"
+        name="vehicle-add-step2"
         options={{
           title: "차량 등록",
           headerShown: true,
         }}
       />
       <Stack.Screen
-        name="add/step3"
+        name="vehicle-add-step3"
         options={{
           title: "차량 등록",
           headerShown: true,

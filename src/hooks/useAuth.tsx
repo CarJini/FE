@@ -101,8 +101,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await fetchUserInfo(accessToken);
     } catch (e) {
       console.error("Error handling redirect URL", e);
-    } finally {
-      console.log("complete handle redirect url");
     }
   }
 

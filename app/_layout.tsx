@@ -31,7 +31,7 @@ function AuthRedirect() {
     if (!isAuthenticated && !inAuthGroup) {
       router.replace("/(auth)/login");
     } else if (isAuthenticated && !inAppGroup) {
-      router.replace("/(app)/(tabs)/vehicle");
+      router.replace("/(app)/(tabs)/vehicle/vehicle-list");
     }
   }, [isAuthenticated, segments, isLoading]);
 

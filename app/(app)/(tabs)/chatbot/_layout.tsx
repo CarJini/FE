@@ -10,7 +10,7 @@ export default function ChatbotLayout() {
       }}
     >
       <Stack.Screen
-        name="index"
+        name="chat"
         options={{
           title: "챗봇",
           headerShown: true,
