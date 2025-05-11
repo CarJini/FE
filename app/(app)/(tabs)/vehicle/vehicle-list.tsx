@@ -1,15 +1,13 @@
 import {
   View,
   Text,
-  ScrollView,
   StyleSheet,
-  SafeAreaView,
   Pressable,
   Image,
   RefreshControl,
 } from "react-native";
 import { MaintenanceItemStatus } from "@/src/components/vehicle";
-import { Button } from "@/src/components";
+import { Button, ScreenLayout } from "@/src/components";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import {
@@ -71,49 +69,45 @@ export default function VehicleListScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 justify-center">
-      <ScrollView
-        className="flex-1 min-h-full"
-        contentContainerStyle={{ flexGrow: 1 }}
-        refreshControl={
-          <RefreshControl
-            refreshing={false}
-            onRefresh={() => {
-              fetchMyVehicles();
-            }}
-          />
-        }
-      >
-        {myVehicles.map((vehicle) => (
-          <VehicleCard
-            key={vehicle.id}
-            vehicle={vehicle}
-            maintenanceItems={maintenanceItemsByVehicle[vehicle.id] || []}
-            selectedStatus={selectedStatusByVehicle[vehicle.id] || 0}
-            onSelectStatus={(index) => onSelectStatus(vehicle.id, index)}
-          />
-        ))}
-        {myVehicles.length === 0 && (
-          <View className="flex-1 items-center justify-center">
-            <View className="w-[80px] h-[80px] rounded-lg bg-slate-300 justify-center items-center mb-4">
-              <Ionicons name="car" size={32} />
-            </View>
-            <Text className="text-xl font-bold mb-2">
-              등록된 차량이 없습니다.
-            </Text>
-            <Text className="text-gray-600 opacity-80">
-              차량을 등록하고 관리해보세요.
-            </Text>
+    <ScreenLayout
+      headerTitle="차량 관리"
+      scroll={true}
+      refreshControl={
+        <RefreshControl
+          refreshing={false}
+          onRefresh={() => {
+            fetchMyVehicles();
+          }}
+        />
+      }
+    >
+      {myVehicles.map((vehicle) => (
+        <VehicleCard
+          key={vehicle.id}
+          vehicle={vehicle}
+          maintenanceItems={maintenanceItemsByVehicle[vehicle.id] || []}
+          selectedStatus={selectedStatusByVehicle[vehicle.id] || 0}
+          onSelectStatus={(index) => onSelectStatus(vehicle.id, index)}
+        />
+      ))}
+      {myVehicles.length === 0 && (
+        <View className="flex-1 items-center justify-center">
+          <View className="w-[80px] h-[80px] rounded-lg bg-slate-300 justify-center items-center mb-4">
+            <Ionicons name="car" size={32} />
           </View>
-        )}
-        <View className="w-full p-4">
-          <Button
-            label={myVehicles.length === 0 ? "차량 등록" : "차량 추가 등록"}
-            onPress={onClickAddVehicle}
-          />
+          <Text className="text-xl font-bold mb-2">
+            등록된 차량이 없습니다.
+          </Text>
+          <Text className="text-gray-600 opacity-80">
+            차량을 등록하고 관리해보세요.
+          </Text>
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      )}
+      <Button
+        label={myVehicles.length === 0 ? "차량 등록" : "차량 추가 등록"}
+        onPress={onClickAddVehicle}
+      />
+    </ScreenLayout>
   );
 }
 
@@ -159,9 +153,9 @@ function VehicleCard({
   );
 
   return (
-    <View className="p-4">
+    <View className="mb-4">
       <Pressable
-        className="bg-white active:bg-gray-100 rounded-lg p-4 border border-gray-200"
+        className="bg-white active:bg-gray-100 rounded-lg border border-gray-200"
         onPress={onClickVehicle}
       >
         <View className="flex-row items-center">
@@ -169,7 +163,7 @@ function VehicleCard({
             source={{ uri: vehicle.image }}
             className="w-[70px] h-[70px] rounded-lg mr-4"
           />
-          <View className="flex-1">
+          <View className="flex-1 pr-3">
             <View className="flex-row justify-between items-center">
               <View>
                 <Text className="text-lg font-bold mb-1">{vehicle.model}</Text>

@@ -1,12 +1,19 @@
-import { ScrollView, SafeAreaView, Platform } from "react-native";
-import { useState } from "react";
-import { Button, Card, DateInput, InputBox } from "@/src/components";
+import { ScrollView, SafeAreaView, Platform, BackHandler } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  Button,
+  Card,
+  DateInput,
+  IconButton,
+  InputBox,
+  ScreenLayout,
+} from "@/src/components";
 import { useRouter } from "expo-router";
 import { API_ENDPOINTS } from "@/src/services/apiEndpoints";
 import { apiClient } from "@/src/services/api";
 import { MaintenanceHistory } from "@/src/types";
 import { replacePathParams } from "@/src/utils";
-import { useMaintenanceParams } from "@/src/hooks";
+import { useMaintenanceParams, useSafeBackRedirect } from "@/src/hooks";
 import { useMaintenanceHistoryStore } from "@/src/store/useMaintenanceHistoryStore";
 import Toast from "react-native-toast-message";
 
@@ -32,6 +39,13 @@ export default function MaintenanceHistoryFormScreen() {
             replacementKm: 0,
           }
     );
+  useSafeBackRedirect(onBackPress);
+
+  function onBackPress() {
+    router.replace(
+      `/vehicle/maintenance-item-detail?vehicleId=${vehicleId}&itemId=${maintenanceItemId}`
+    );
+  }
 
   function onChangeInput(value: number) {
     setMaintenanceHistory((prev) => ({
@@ -125,31 +139,33 @@ export default function MaintenanceHistoryFormScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1">
-      <ScrollView className="flex-1 p-4">
-        <Card>
-          <DateInput
-            label="정비 날짜"
-            date={maintenanceHistory.replacementDate}
-            onChange={onDateChange}
-          />
-          <InputBox
-            label="누적 주행 거리(km)"
-            value={maintenanceHistory.replacementKm.toString()}
-            onChangeText={(nextValue) =>
-              onChangeInput(nextValue.trim() === "" ? 0 : parseInt(nextValue))
-            }
-            keyboardType={Platform.select({
-              ios: "decimal-pad",
-              android: "numeric",
-            })}
-          />
-          {isEditMode && (
-            <Button label="삭제" color="secondary" onPress={onDelete} />
-          )}
-          <Button label={isEditMode ? "저장" : "추가"} onPress={onSave} />
-        </Card>
-      </ScrollView>
-    </SafeAreaView>
+    <ScreenLayout
+      headerTitle={`정비 이력 ${isEditMode ? "수정" : "추가"}`}
+      scroll={true}
+      LeftHeader={<IconButton iconName="chevron-back" onPress={onBackPress} />}
+    >
+      <Card>
+        <DateInput
+          label="정비 날짜"
+          date={maintenanceHistory.replacementDate}
+          onChange={onDateChange}
+        />
+        <InputBox
+          label="누적 주행 거리(km)"
+          value={maintenanceHistory.replacementKm.toString()}
+          onChangeText={(nextValue) =>
+            onChangeInput(nextValue.trim() === "" ? 0 : parseInt(nextValue))
+          }
+          keyboardType={Platform.select({
+            ios: "decimal-pad",
+            android: "numeric",
+          })}
+        />
+        {isEditMode && (
+          <Button label="삭제" color="secondary" onPress={onDelete} />
+        )}
+        <Button label={isEditMode ? "저장" : "추가"} onPress={onSave} />
+      </Card>
+    </ScreenLayout>
   );
 }

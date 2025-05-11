@@ -1,12 +1,18 @@
-import { ScrollView, SafeAreaView } from "react-native";
-import { Button, Card, DateInput, InputBox } from "@/src/components";
+import {
+  Button,
+  Card,
+  DateInput,
+  IconButton,
+  InputBox,
+  ScreenLayout,
+} from "@/src/components";
 import { toNumber, replacePathParams } from "@/src/utils";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { API_ENDPOINTS } from "@/src/services/apiEndpoints";
 import { apiClient } from "@/src/services/api";
 import { router } from "expo-router";
 import { useVehicleStore } from "@/src/store";
-import { useMaintenanceParams } from "@/src/hooks";
+import { useMaintenanceParams, useSafeBackRedirect } from "@/src/hooks";
 import Toast from "react-native-toast-message";
 
 // 차량 상세
@@ -105,33 +111,36 @@ export default function VehicleEditScreen() {
     });
   }
 
+  useSafeBackRedirect(onBackPress);
+
+  function onBackPress() {
+    router.replace(`/vehicle/vehicle-list`);
+  }
+
   if (!currentVehicle) {
     return null;
   }
 
   return (
-    <SafeAreaView className="flex-1">
-      <ScrollView className="p-4">
-        <Card>
-          <InputBox
-            label="제조사"
-            value={currentVehicle.brand}
-            editable={false}
-          />
-          <InputBox
-            label="차종"
-            value={currentVehicle.model}
-            editable={false}
-          />
-          <DateInput
-            label="차량 등록일"
-            date={currentVehicle.startDate}
-            onChange={onChange}
-          />
-          <Button label="삭제" color="secondary" onPress={onDelete} />
-          <Button label="저장" onPress={onSave} />
-        </Card>
-      </ScrollView>
-    </SafeAreaView>
+    <ScreenLayout
+      headerTitle="차량 상세"
+      LeftHeader={<IconButton iconName="chevron-back" onPress={onBackPress} />}
+    >
+      <Card>
+        <InputBox
+          label="제조사"
+          value={currentVehicle.brand}
+          editable={false}
+        />
+        <InputBox label="차종" value={currentVehicle.model} editable={false} />
+        <DateInput
+          label="차량 등록일"
+          date={currentVehicle.startDate}
+          onChange={onChange}
+        />
+        <Button label="삭제" color="secondary" onPress={onDelete} />
+        <Button label="저장" onPress={onSave} />
+      </Card>
+    </ScreenLayout>
   );
 }

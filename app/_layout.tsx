@@ -32,10 +32,8 @@ function AuthRedirect() {
     const inAppGroup = segments[0] === "(app)";
 
     if (!isAuthenticated && !inAuthGroup) {
-      console.log("여기로 오는지 확인 중 ::: 로그인 화면으로 가자!!!!!!!");
       router.replace("/(auth)/login");
     } else if (isAuthenticated && !inAppGroup) {
-      console.log("여기로 오는지 확인 중 ::: 성공 !!! 기능으로 @@@@@@@");
       router.replace("/(app)/(tabs)/vehicle/vehicle-list");
     }
   }, [isAuthenticated, segments, isLoading]);

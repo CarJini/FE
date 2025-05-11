@@ -1,12 +1,4 @@
-import {
-  ScrollView,
-  SafeAreaView,
-  Text,
-  View,
-  Pressable,
-  TouchableOpacity,
-  RefreshControl,
-} from "react-native";
+import { Text, View, RefreshControl, Pressable } from "react-native";
 import { MaintenanceItemStatus } from "@/src/components/vehicle";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
@@ -14,10 +6,11 @@ import { MaintenanceHistory } from "@/src/types";
 import { API_ENDPOINTS } from "@/src/services/apiEndpoints";
 import { apiClient } from "@/src/services/api";
 import { replacePathParams } from "@/src/utils";
-import { useMaintenanceParams } from "@/src/hooks";
+import { useMaintenanceParams, useSafeBackRedirect } from "@/src/hooks";
 import { useMaintenanceHistoryStore } from "@/src/store/useMaintenanceHistoryStore";
 import { useVehicleStore } from "@/src/store";
 import { format } from "date-fns";
+import { Button, Card, IconButton, ScreenLayout } from "@/src/components";
 
 // 정비 품목 상세
 export default function MaintenanceItemDetailScreen() {
@@ -38,6 +31,11 @@ export default function MaintenanceItemDetailScreen() {
   const setCurrentHistory = useMaintenanceHistoryStore(
     (state) => state.setCurrent
   );
+  useSafeBackRedirect(onBackPress);
+
+  function onBackPress() {
+    router.replace(`/vehicle/maintenance-items?vehicleId=${vehicleId}`);
+  }
 
   async function fetchMaintenanceHistories() {
     try {
@@ -103,67 +101,51 @@ export default function MaintenanceItemDetailScreen() {
       ) ?? [];
 
   return (
-    <SafeAreaView className="flex-1">
-      <ScrollView
-        className="flex-1 min-h-full"
-        refreshControl={
-          <RefreshControl
-            refreshing={false}
-            onRefresh={() => {
-              fetchMaintenanceItems(vehicleId);
-              fetchMaintenanceHistories();
-            }}
-          />
-        }
-      >
-        <View className="p-4">
-          <View className="p-4 bg-white active:bg-gray-200 rounded-lg border border-gray-200 my-2">
-            <MaintenanceItemStatus
-              vehicleNowKm={vehicleInfo.nowKm}
-              item={item}
-            />
-
-            <TouchableOpacity
-              className="flex-1 p-3 rounded-lg mt-3 bg-blue-500 active:bg-blue-300"
-              onPress={onEditMaintenance}
+    <ScreenLayout
+      headerTitle="정비 품목 상세"
+      scroll={true}
+      refreshControl={
+        <RefreshControl
+          refreshing={false}
+          onRefresh={() => {
+            fetchMaintenanceItems(vehicleId);
+            fetchMaintenanceHistories();
+          }}
+        />
+      }
+      LeftHeader={<IconButton iconName="chevron-back" onPress={onBackPress} />}
+    >
+      <Card>
+        <MaintenanceItemStatus vehicleNowKm={vehicleInfo.nowKm} item={item} />
+        <Button label="품목 수정" onPress={onEditMaintenance} />
+      </Card>
+      <Card customClassName="mt-4">
+        <Text className="text-lg font-bold mb-4">정비 이력</Text>
+        {filteredHistories.length === 0 && (
+          <Text className="mt-6 mb-6 text-sm text-gray-400 text-center">
+            등록된 정비 이력이 없습니다.
+          </Text>
+        )}
+        <View>
+          {filteredHistories.map((history) => (
+            <Pressable
+              key={history.id}
+              onPress={() => onEditHistory(history)}
+              className="rounded-lg bg-white p-4 mb-2 border border-gray-200 active:bg-gray-100 shadow-sm"
             >
-              <Text className="text-center text-white">품목 수정</Text>
-            </TouchableOpacity>
-          </View>
-          <View className="p-4 bg-white rounded-lg border border-gray-200">
-            <Text className="text-lg font-bold mb-4">정비 이력</Text>
-            {filteredHistories.length === 0 && (
-              <Text className="mt-6 mb-6 text-sm text-gray-400 text-center">
-                등록된 정비 이력이 없습니다.
-              </Text>
-            )}
-            <View className="gap-3">
-              {filteredHistories.map((history) => (
-                <Pressable
-                  key={history.id}
-                  onPress={() => onEditHistory(history)}
-                  className="rounded-lg bg-white p-4 mb-2 border border-gray-200 active:bg-gray-100 shadow-sm"
-                >
-                  <View className="flex-row items-center justify-between mb-1">
-                    <Text className="text-sm font-semibold">
-                      {format(history.replacementDate, "yyyy-MM-dd")}
-                    </Text>
-                    <Text className="text-sm text-blue-500">
-                      {history.replacementKm?.toLocaleString()} Km
-                    </Text>
-                  </View>
-                </Pressable>
-              ))}
-              <Pressable
-                className="flex-1 p-3 rounded-lg mt-3 bg-blue-500 active:bg-blue-300"
-                onPress={onAddHistory}
-              >
-                <Text className={`text-center text-white`}>이력 추가</Text>
-              </Pressable>
-            </View>
-          </View>
+              <View className="flex-row items-center justify-between mb-1">
+                <Text className="text-sm font-semibold">
+                  {format(history.replacementDate, "yyyy-MM-dd")}
+                </Text>
+                <Text className="text-sm text-blue-500">
+                  {history.replacementKm?.toLocaleString()} Km
+                </Text>
+              </View>
+            </Pressable>
+          ))}
+          <Button label="이력 추가" onPress={onAddHistory} />
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      </Card>
+    </ScreenLayout>
   );
 }

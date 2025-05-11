@@ -41,7 +41,6 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 apiClient.interceptors.response.use(
   (res) => res,
   async (error) => {
-    await delay(10000);
     const originalRequest = error.config;
     const { method, url: tokenRefreshUrl } = API_ENDPOINTS.AUTH.REFRESH_TOKEN;
 

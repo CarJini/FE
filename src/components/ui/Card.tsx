@@ -1,20 +1,17 @@
-import { StyleProp, View, ViewStyle } from "react-native";
+import { View } from "react-native";
 
 export function Card({
   children,
-  style,
-  className,
+  customClassName,
 }: {
   children: React.ReactNode;
-  style?: StyleProp<ViewStyle>;
-  className?: string;
+  customClassName?: string;
 }) {
   return (
     <View
       className={`p-4 bg-white active:bg-gray-200 rounded-xl border border-gray-200 ${
-        className || ""
+        customClassName || ""
       }`}
-      style={style}
     >
       {children}
     </View>

@@ -97,6 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ? queryParams?.refreshToken[0]
       : queryParams?.refreshToken;
 
+    console.log("refreshToken>>>>>>>>>>", refreshToken);
     try {
       await AsyncStorage.setItem("accessToken", accessToken);
       await AsyncStorage.setItem("refreshToken", refreshToken);

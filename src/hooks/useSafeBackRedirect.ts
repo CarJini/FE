@@ -1,37 +1,18 @@
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { useCallback, useRef } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 import { BackHandler } from "react-native";
-import { router } from "expo-router";
 
-export function useSafeBackRedirect(redirectUrl: string) {
-  const navigation = useNavigation();
-  const triggered = useRef(false);
-
-  const onBackPress = () => {
-    if (triggered.current) return true;
-    triggered.current = true;
-
-    setTimeout(() => {
-      router.replace(redirectUrl as any);
-    }, 0);
-
-    return true;
-  };
-
+export function useSafeBackRedirect(onRedirect: () => void) {
   useFocusEffect(
     useCallback(() => {
-      const subscription = BackHandler.addEventListener(
+      const backHandler = BackHandler.addEventListener(
         "hardwareBackPress",
-        onBackPress
+        () => {
+          onRedirect();
+          return true;
+        }
       );
-      const unsubscribe = navigation.addListener("beforeRemove", (e) => {
-        onBackPress();
-      });
-
-      return () => {
-        subscription.remove();
-        unsubscribe();
-      };
+      return () => backHandler.remove();
     }, [])
   );
 }

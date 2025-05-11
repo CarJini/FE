@@ -4,9 +4,6 @@ import {
   TextInput,
   Pressable,
   ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
   Animated,
 } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
@@ -14,6 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { API_ENDPOINTS } from "@/src/services/apiEndpoints";
 import { apiClient } from "@/src/services/api";
 import { replacePathParams } from "@/src/utils";
+import { ScreenLayout } from "@/src/components";
 
 type Message = {
   message: string;
@@ -83,71 +81,61 @@ export default function ChatScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 80}
-      className="flex-1"
-    >
-      <SafeAreaView className="flex-1">
-        <View className="flex-1">
-          <ScrollView
-            ref={scrollViewRef}
-            className="flex-1 p-4 pb-8"
-            contentContainerStyle={{ flexGrow: 1 }}
-            keyboardShouldPersistTaps="handled"
-            onContentSizeChange={scrollToBottom}
-            onLayout={scrollToBottom}
+    <ScreenLayout headerTitle="챗봇" scroll={true}>
+      <ScrollView
+        ref={scrollViewRef}
+        className="flex-1 p-4 pb-8"
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+        onContentSizeChange={scrollToBottom}
+        onLayout={scrollToBottom}
+      >
+        {messages.map((message) => (
+          <View
+            key={message.message + message.createdAt}
+            className={`max-w-4/5 p-3 rounded-2xl mb-2 ${
+              message.isUser ? "self-end bg-blue-600" : "self-start bg-white"
+            }`}
           >
-            {messages.map((message) => (
-              <View
-                key={message.message + message.createdAt}
-                className={`max-w-4/5 p-3 rounded-2xl mb-2 ${
-                  message.isUser
-                    ? "self-end bg-blue-600"
-                    : "self-start bg-white"
-                }`}
-              >
-                <Text
-                  className={`text-base leading-6 ${
-                    message.isUser ? "text-white" : "text-gray-800"
-                  }`}
-                >
-                  {message.message}
-                </Text>
-                <Text className="text-xs text-gray-400 mt-1 self-end">
-                  {message.createdAt?.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </Text>
-              </View>
-            ))}
-            {isBotTyping && (
-              <View className="max-w-4/5 p-3 rounded-2xl mb-2 self-start bg-white">
-                <TypingIndicator />
-              </View>
-            )}
-          </ScrollView>
-
-          <View className="flex-row p-4 bg-white border-t border-gray-200">
-            <TextInput
-              className="flex-1 bg-gray-200 rounded-full px-4 py-2 mr-2 text-base max-h-24"
-              value={inputText}
-              onChangeText={setInputText}
-              placeholder="메시지를 입력하세요..."
-              placeholderTextColor="#999"
-              multiline
-            />
-            <Pressable
-              className="w-10 h-10 rounded-full bg-blue-600 justify-center items-center"
-              onPress={onSendMessage}
+            <Text
+              className={`text-base leading-6 ${
+                message.isUser ? "text-white" : "text-gray-800"
+              }`}
             >
-              <Ionicons name="paper-plane" size={24} color="white" />
-            </Pressable>
+              {message.message}
+            </Text>
+            <Text className="text-xs text-gray-400 mt-1 self-end">
+              {message.createdAt?.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </Text>
           </View>
-        </View>
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+        ))}
+        {isBotTyping && (
+          <View className="max-w-4/5 p-3 rounded-2xl mb-2 self-start bg-white">
+            <TypingIndicator />
+          </View>
+        )}
+      </ScrollView>
+
+      <View className="flex-row p-4 bg-white border-t border-gray-200">
+        <TextInput
+          className="flex-1 bg-gray-200 rounded-full px-4 py-2 mr-2 text-base max-h-24"
+          value={inputText}
+          onChangeText={setInputText}
+          placeholder="메시지를 입력하세요..."
+          placeholderTextColor="#999"
+          multiline
+        />
+        <Pressable
+          className="w-10 h-10 rounded-full bg-blue-600 justify-center items-center"
+          onPress={onSendMessage}
+        >
+          <Ionicons name="paper-plane" size={24} color="white" />
+        </Pressable>
+      </View>
+    </ScreenLayout>
   );
 }
 

@@ -1,10 +1,17 @@
-import { Button, Card, DateInput, InputBox } from "@/src/components";
+import {
+  Button,
+  Card,
+  DateInput,
+  IconButton,
+  InputBox,
+  ScreenLayout,
+} from "@/src/components";
 import { apiClient } from "@/src/services/api";
 import { API_ENDPOINTS } from "@/src/services/apiEndpoints";
 import { useVehicleStore } from "@/src/store";
 import { router } from "expo-router";
 import { useEffect } from "react";
-import { Text, SafeAreaView, ScrollView, View } from "react-native";
+import { Text } from "react-native";
 import { useSafeBackRedirect } from "@/src/hooks";
 import Toast from "react-native-toast-message";
 
@@ -12,8 +19,6 @@ export default function VehicleAddStep3Screen() {
   const currentVehicle = useVehicleStore((state) => state.vehicleData);
   const updateVehicleData = useVehicleStore((state) => state.updateVehicleData);
   const resetVehicleData = useVehicleStore((state) => state.resetVehicleData);
-
-  useSafeBackRedirect("/vehicle/vehicle-list");
 
   useEffect(() => {
     return () => {
@@ -51,31 +56,32 @@ export default function VehicleAddStep3Screen() {
     updateVehicleData((prev) => ({ ...prev, startDate: date }));
   }
 
+  useSafeBackRedirect(onBackPress);
+
+  function onBackPress() {
+    router.replace(`/vehicle/vehicle-list`);
+  }
+
   return (
-    <SafeAreaView className="flex-1">
-      <ScrollView className="flex-1">
-        <View className="p-4">
-          <Card>
-            <Text className="mb-3 text-2xl font-bold">기본 정보</Text>
-            <InputBox
-              label="제조사"
-              value={currentVehicle.maker}
-              editable={false}
-            />
-            <InputBox
-              label="차종"
-              value={currentVehicle.model}
-              editable={false}
-            />
-            <DateInput
-              label="차량 등록일"
-              date={currentVehicle.startDate}
-              onChange={onChangeDate}
-            />
-            <Button label="차량 등록하기" onPress={onSave} />
-          </Card>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <ScreenLayout
+      headerTitle="차량 등록"
+      LeftHeader={<IconButton iconName="home" onPress={onBackPress} />}
+    >
+      <Card>
+        <Text className="mb-3 text-2xl font-bold">기본 정보</Text>
+        <InputBox
+          label="제조사"
+          value={currentVehicle.maker}
+          editable={false}
+        />
+        <InputBox label="차종" value={currentVehicle.model} editable={false} />
+        <DateInput
+          label="차량 등록일"
+          date={currentVehicle.startDate}
+          onChange={onChangeDate}
+        />
+        <Button label="차량 등록하기" onPress={onSave} />
+      </Card>
+    </ScreenLayout>
   );
 }

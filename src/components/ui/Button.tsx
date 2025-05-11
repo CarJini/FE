@@ -3,12 +3,12 @@ import { Pressable, Text } from "react-native";
 export function Button({
   label,
   color = "primary",
-  className,
+  customClassName,
   onPress,
 }: {
   label: string;
   color?: "primary" | "secondary" | "success";
-  className?: string;
+  customClassName?: string;
   onPress: () => void;
 }) {
   const colorMap = {
@@ -23,7 +23,9 @@ export function Button({
   };
   return (
     <Pressable
-      className={`p-3 rounded-lg mt-3 ${colorMap[color]} ${className || ""}`}
+      className={`w-full p-3 rounded-lg mt-3 ${colorMap[color]} ${
+        customClassName || ""
+      }`}
       onPress={onPress}
     >
       <Text className={`text-center ${textColorMap[color]}`}>{label}</Text>

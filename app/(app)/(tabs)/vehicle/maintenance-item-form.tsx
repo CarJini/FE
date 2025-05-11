@@ -1,10 +1,16 @@
-import { SafeAreaView, Text, View } from "react-native";
+import { SafeAreaView, Text, TextInput, View } from "react-native";
 import { useState, useEffect } from "react";
 import {
   MaintenanceItemRequest,
   MaintenanceItemCategoryOptions,
 } from "@/src/types";
-import { Button, Card, InputBox } from "@/src/components";
+import {
+  Button,
+  Card,
+  IconButton,
+  InputBox,
+  ScreenLayout,
+} from "@/src/components";
 import { useRouter } from "expo-router";
 import {
   MaintenanceItemCategoryType,
@@ -16,7 +22,7 @@ import {
   mapMaintenanceResponseToRequest,
   replacePathParams,
 } from "@/src/utils";
-import { useMaintenanceParams } from "@/src/hooks";
+import { useMaintenanceParams, useSafeBackRedirect } from "@/src/hooks";
 import { useVehicleStore } from "@/src/store";
 import { Toggle } from "@ui-kitten/components";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -28,10 +34,6 @@ export default function MaintenanceItemFormScreen() {
   const maintenanceItemsByVehicle = useVehicleStore(
     (state) => state.maintenanceItemsByVehicle
   );
-  const fetchMaintenanceItems = useVehicleStore(
-    (state) => state.fetchMaintenanceItems
-  );
-
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [categoryItems, setCategoryItems] = useState([
     ...MaintenanceItemCategoryOptions,
@@ -44,6 +46,8 @@ export default function MaintenanceItemFormScreen() {
     value: MaintenanceItemCategoryType;
     label: string;
   } | null>(null);
+
+  useSafeBackRedirect(onBackPress);
 
   useEffect(() => {
     const foundItem = maintenanceItemsByVehicle[vehicleId]?.find(
@@ -73,8 +77,12 @@ export default function MaintenanceItemFormScreen() {
     setSelectedItem(defaultCategory);
   }, [isEditMode, vehicleId, itemId, maintenanceItemsByVehicle]);
 
-  if (!maintenanceItem || !selectedItem) {
-    return null;
+  function onBackPress() {
+    isEditMode
+      ? router.replace(
+          `/vehicle/maintenance-item-detail?vehicleId=${vehicleId}&itemId=${itemId}`
+        )
+      : router.replace(`/vehicle/maintenance-items?vehicleId=${vehicleId}`);
   }
 
   function onChangeInput(
@@ -173,101 +181,112 @@ export default function MaintenanceItemFormScreen() {
     }
   }
 
+  if (!maintenanceItem || !selectedItem) {
+    return null;
+  }
+
   if (isEditMode && !maintenanceItem) {
     return null;
   }
 
   return (
-    <SafeAreaView className="flex-1">
-      <View className="p-4">
-        <Card>
-          <Text className="text-base mb-2">기본 정보</Text>
-          <View className="mb-3">
+    <ScreenLayout
+      headerTitle={`정비 품목 ${isEditMode ? "수정" : "추가"}`}
+      scroll={false}
+      LeftHeader={<IconButton iconName="chevron-back" onPress={onBackPress} />}
+    >
+      <Card>
+        <View className="mb-3">
+          <Text className="mb-2 text-sm font-medium text-gray-700">
+            정비 품목
+          </Text>
+          <DropDownPicker
+            placeholder="정비 품목을 선택하세요"
+            open={isPickerOpen}
+            value={maintenanceItem.category}
+            items={categoryItems}
+            setOpen={setIsPickerOpen}
+            setValue={(callback) =>
+              setMaintenanceItem((prev) => ({
+                ...prev!,
+                category:
+                  typeof callback === "function"
+                    ? callback(prev!.category)
+                    : callback,
+              }))
+            }
+            setItems={setCategoryItems}
+            style={{
+              borderColor: "#D1D5DB",
+              borderWidth: 1,
+              borderRadius: 8,
+            }}
+            dropDownContainerStyle={{
+              borderColor: "#D1D5DB",
+              borderWidth: 1,
+              borderRadius: 8,
+            }}
+          />
+        </View>
+        <View className="flex-row">
+          <View className="flex-1 mb-4">
             <Text className="mb-2 text-sm font-medium text-gray-700">
-              정비 품목
+              교체 주기 (km)
             </Text>
-            <DropDownPicker
-              placeholder="정비 품목을 선택하세요"
-              open={isPickerOpen}
-              value={maintenanceItem.category}
-              items={categoryItems}
-              setOpen={setIsPickerOpen}
-              setValue={(callback) =>
-                setMaintenanceItem((prev) => ({
-                  ...prev!,
-                  category:
-                    typeof callback === "function"
-                      ? callback(prev!.category)
-                      : callback,
-                }))
-              }
-              setItems={setCategoryItems}
-              style={{
-                borderColor: "#D1D5DB",
-                borderWidth: 1,
-                borderRadius: 8,
-              }}
-              dropDownContainerStyle={{
-                borderColor: "#D1D5DB",
-                borderWidth: 1,
-                borderRadius: 8,
-              }}
-            />
-          </View>
-          <View className="flex-row">
-            <InputBox
-              label="교체 주기 (km)"
+            <TextInput
+              className="w-full px-4 py-3 border rounded-lg bg-white text-gray-900 border-gray-300"
               value={maintenanceItem.replacementKm?.toString()}
               onChangeText={(nextValue) =>
                 onChangeInput("replacementKm", nextValue)
               }
               keyboardType="numeric"
             />
-            <View className="ml-5 items-center">
-              <Text className="mb-3 text-sm font-medium text-gray-700">
-                알림
-              </Text>
-              <Toggle
-                checked={maintenanceItem.kmAlarm}
-                onChange={() =>
-                  onCheckedChange({
-                    checkedType: "kmAlarm",
-                    checked: !maintenanceItem.kmAlarm,
-                  })
-                }
-              />
-            </View>
           </View>
-          <View className="flex-row">
-            <InputBox
-              label="교체 주기 (개월)"
+          <View className="ml-5 items-center">
+            <Text className="mb-3 text-sm font-medium text-gray-700">알림</Text>
+            <Toggle
+              checked={maintenanceItem.kmAlarm}
+              onChange={() =>
+                onCheckedChange({
+                  checkedType: "kmAlarm",
+                  checked: !maintenanceItem.kmAlarm,
+                })
+              }
+            />
+          </View>
+        </View>
+        <View className="flex-row">
+          <View className="flex-1 mb-4">
+            <Text className="mb-2 text-sm font-medium text-gray-700">
+              교체 주기 (개월)
+            </Text>
+            <TextInput
+              className="w-full px-4 py-3 border rounded-lg bg-white text-gray-900 border-gray-300"
               value={maintenanceItem.replacementCycle?.toString()}
               onChangeText={(nextValue) =>
                 onChangeInput("replacementCycle", nextValue)
               }
               keyboardType="numeric"
             />
-            <View className="ml-5 items-center">
-              <Text className="mb-3 text-sm font-medium text-gray-700">
-                알림
-              </Text>
-              <Toggle
-                checked={maintenanceItem.cycleAlarm}
-                onChange={() =>
-                  onCheckedChange({
-                    checkedType: "cycleAlarm",
-                    checked: !maintenanceItem.cycleAlarm,
-                  })
-                }
-              />
-            </View>
           </View>
-          {isEditMode && (
-            <Button label="삭제" color="secondary" onPress={onDelete} />
-          )}
-          <Button label={isEditMode ? "저장" : "추가"} onPress={onSave} />
-        </Card>
-      </View>
-    </SafeAreaView>
+          <View className="ml-5 items-center">
+            <Text className="mb-3 text-sm font-medium text-gray-700">알림</Text>
+            <Toggle
+              checked={maintenanceItem.cycleAlarm}
+              onChange={() =>
+                onCheckedChange({
+                  checkedType: "cycleAlarm",
+                  checked: !maintenanceItem.cycleAlarm,
+                })
+              }
+            />
+          </View>
+        </View>
+        {isEditMode && (
+          <Button label="삭제" color="secondary" onPress={onDelete} />
+        )}
+        <Button label={isEditMode ? "저장" : "추가"} onPress={onSave} />
+      </Card>
+    </ScreenLayout>
   );
 }

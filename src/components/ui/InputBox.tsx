@@ -10,7 +10,7 @@ type Props = React.ComponentProps<typeof TextInput> & {
 export function InputBox({ label, ...props }: Props) {
   const isDisabled = props.editable === false;
   return (
-    <View className="mb-4 flex-1">
+    <View className="w-full mb-4">
       {label && (
         <Text className="mb-2 text-sm font-medium text-gray-700">{label}</Text>
       )}
