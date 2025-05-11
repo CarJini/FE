@@ -5,13 +5,18 @@ import {
   Pressable,
   ScrollView,
   Animated,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
+import { StatusBar } from "expo-status-bar";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { API_ENDPOINTS } from "@/src/services/apiEndpoints";
 import { apiClient } from "@/src/services/api";
 import { replacePathParams } from "@/src/utils";
-import { ScreenLayout } from "@/src/components";
+import { Header, ScreenLayout } from "@/src/components";
+import Markdown from "react-native-markdown-display";
 
 type Message = {
   message: string;
@@ -30,10 +35,6 @@ export default function ChatScreen() {
   const [inputText, setInputText] = useState("");
   const [isBotTyping, setIsBotTyping] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
-
-  const scrollToBottom = () => {
-    scrollViewRef.current?.scrollToEnd({ animated: true });
-  };
 
   async function onSendMessage() {
     setInputText("");
@@ -81,43 +82,110 @@ export default function ChatScreen() {
   }
 
   return (
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+    >
+      <SafeAreaView className="flex-1" edges={["top"]}>
+        <StatusBar style="dark" backgroundColor="#ffffff" />
+        <Header title="챗봇" />
+        <View className="flex-1">
+          <ScrollView
+            ref={scrollViewRef}
+            contentContainerStyle={{ padding: 16 }}
+            onContentSizeChange={() =>
+              scrollViewRef.current?.scrollToEnd({ animated: true })
+            }
+          >
+            {messages.map((message) => (
+              <View
+                key={message.message + message.createdAt}
+                className={`max-w-4/5 p-3 rounded-2xl mb-2 ${
+                  message.isUser
+                    ? "self-end bg-blue-600"
+                    : "self-start bg-white"
+                }`}
+              >
+                {message.isUser ? (
+                  <Text className="text-base leading-6 text-white">
+                    {message.message}
+                  </Text>
+                ) : (
+                  <Markdown
+                    style={{
+                      body: { color: "#1f2937", fontSize: 16 }, // Tailwind: text-gray-800
+                    }}
+                  >
+                    {message.message}
+                  </Markdown>
+                )}
+                <Text className="text-xs text-gray-400 mt-1 self-end">
+                  {message.createdAt?.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </View>
+            ))}
+            {isBotTyping && (
+              <View className="max-w-4/5 p-3 rounded-2xl mb-2 self-start bg-white">
+                <TypingIndicator />
+              </View>
+            )}
+          </ScrollView>
+
+          {/* 메시지 입력창 */}
+          <View className="flex-row p-4 bg-white border-t border-gray-200">
+            <TextInput
+              className="flex-1 bg-gray-200 rounded-full px-4 py-2 mr-2 text-base max-h-24"
+              value={inputText}
+              onChangeText={setInputText}
+              placeholder="메시지를 입력하세요..."
+              placeholderTextColor="#999"
+              multiline
+            />
+            <Pressable
+              className="w-10 h-10 rounded-full bg-blue-600 justify-center items-center"
+              onPress={onSendMessage}
+            >
+              <Ionicons name="paper-plane" size={24} color="white" />
+            </Pressable>
+          </View>
+        </View>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
+  );
+
+  return (
     <ScreenLayout headerTitle="챗봇" scroll={true}>
-      <ScrollView
-        ref={scrollViewRef}
-        className="flex-1 p-4 pb-8"
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-        onContentSizeChange={scrollToBottom}
-        onLayout={scrollToBottom}
-      >
-        {messages.map((message) => (
-          <View
-            key={message.message + message.createdAt}
-            className={`max-w-4/5 p-3 rounded-2xl mb-2 ${
-              message.isUser ? "self-end bg-blue-600" : "self-start bg-white"
+      {messages.map((message) => (
+        <View
+          key={message.message + message.createdAt}
+          className={`max-w-4/5 p-3 rounded-2xl mb-2 ${
+            message.isUser ? "self-end bg-blue-600" : "self-start bg-white"
+          }`}
+        >
+          <Text
+            className={`text-base leading-6 ${
+              message.isUser ? "text-white" : "text-gray-800"
             }`}
           >
-            <Text
-              className={`text-base leading-6 ${
-                message.isUser ? "text-white" : "text-gray-800"
-              }`}
-            >
-              {message.message}
-            </Text>
-            <Text className="text-xs text-gray-400 mt-1 self-end">
-              {message.createdAt?.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </Text>
-          </View>
-        ))}
-        {isBotTyping && (
-          <View className="max-w-4/5 p-3 rounded-2xl mb-2 self-start bg-white">
-            <TypingIndicator />
-          </View>
-        )}
-      </ScrollView>
+            {message.message}
+          </Text>
+          <Text className="text-xs text-gray-400 mt-1 self-end">
+            {message.createdAt?.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </Text>
+        </View>
+      ))}
+      {isBotTyping && (
+        <View className="max-w-4/5 p-3 rounded-2xl mb-2 self-start bg-white">
+          <TypingIndicator />
+        </View>
+      )}
 
       <View className="flex-row p-4 bg-white border-t border-gray-200">
         <TextInput
