@@ -80,24 +80,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function handleRedirectUrl(url: string) {
-    const { path, queryParams } = Linking.parse(url);
-    if (
-      path !== "login-callback" ||
-      !queryParams?.accessToken ||
-      !queryParams?.refreshToken
-    ) {
+    const { queryParams } = Linking.parse(url);
+    if (!queryParams?.accessToken || !queryParams?.refreshToken) {
       return;
     }
 
     const accessToken = Array.isArray(queryParams?.accessToken)
       ? queryParams?.accessToken[0]
       : queryParams?.accessToken;
-
     const refreshToken = Array.isArray(queryParams?.refreshToken)
       ? queryParams?.refreshToken[0]
       : queryParams?.refreshToken;
-
-    console.log("refreshToken>>>>>>>>>>", refreshToken);
     try {
       await AsyncStorage.setItem("accessToken", accessToken);
       await AsyncStorage.setItem("refreshToken", refreshToken);

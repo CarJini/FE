@@ -7,6 +7,7 @@ import {
   Animated,
   KeyboardAvoidingView,
   Platform,
+  Keyboard,
 } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
@@ -35,6 +36,21 @@ export default function ChatScreen() {
   const [inputText, setInputText] = useState("");
   const [isBotTyping, setIsBotTyping] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", () => {
+      setKeyboardVisible(true);
+    });
+    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   async function onSendMessage() {
     setInputText("");
@@ -85,7 +101,9 @@ export default function ChatScreen() {
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+      keyboardVerticalOffset={
+        Platform.OS === "ios" ? 80 : keyboardVisible ? 50 : 0
+      }
     >
       <SafeAreaView className="flex-1" edges={["top"]}>
         <StatusBar style="dark" backgroundColor="#ffffff" />

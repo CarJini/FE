@@ -19,7 +19,9 @@ export function MaintenanceItemStatus({
     (c) => c.value === item.category
   )?.label;
   const elapsedKm = item.replacementKm - item.remainingKm;
-  const elapsedTime = item.replacementCycle * 30 - item.remainingDay;
+  const daysPerMonth = 30.44;
+  const totalCycleDays = item.replacementCycle * daysPerMonth;
+  const elapsedDays = Math.round(totalCycleDays - item.remainingDay);
   return (
     <View className="p-2">
       <Text className="text-lg font-bold mb-2">{category}</Text>
@@ -36,7 +38,7 @@ export function MaintenanceItemStatus({
             <ProgressBar
               progressTitle="기간 주기"
               progress={item.dayProgress}
-              nowText={`${elapsedTime}일`}
+              nowText={`${elapsedDays}일`}
               replacementText={`${item.replacementCycle}개월`}
             />
           </>

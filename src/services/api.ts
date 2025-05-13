@@ -28,7 +28,6 @@ apiClient.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem("accessToken");
     if (token) {
-      console.warn("interceptors 🔥🔥🔥", token);
       config.headers.Authorization = `Bearer ${token}`;
     }
 
@@ -57,7 +56,6 @@ apiClient.interceptors.response.use(
     try {
       const refreshToken = await AsyncStorage.getItem("refreshToken");
       if (!refreshToken) {
-        console.warn("Refresh token not found. Redirecting to login.");
         await useAuthStore.getState().signOut();
         router.replace("/(auth)/login");
         return;

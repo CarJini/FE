@@ -38,6 +38,7 @@ export default function MaintenanceItemFormScreen() {
   const [categoryItems, setCategoryItems] = useState([
     ...MaintenanceItemCategoryOptions,
   ]);
+  DropDownPicker.setListMode("SCROLLVIEW");
 
   const router = useRouter();
   const [maintenanceItem, setMaintenanceItem] =
@@ -192,7 +193,7 @@ export default function MaintenanceItemFormScreen() {
   return (
     <ScreenLayout
       headerTitle={`정비 품목 ${isEditMode ? "수정" : "추가"}`}
-      scroll={false}
+      scroll={true}
       LeftHeader={<IconButton iconName="chevron-back" onPress={onBackPress} />}
     >
       <Card>
