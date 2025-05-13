@@ -9,15 +9,18 @@ import {
   Platform,
   Keyboard,
 } from "react-native";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { API_ENDPOINTS } from "@/src/services/apiEndpoints";
 import { apiClient } from "@/src/services/api";
 import { replacePathParams } from "@/src/utils";
-import { Header, ScreenLayout } from "@/src/components";
+import { Header, IconButton, ScreenLayout } from "@/src/components";
 import Markdown from "react-native-markdown-display";
+import { useVehicleStore } from "@/src/store";
+import { useFocusEffect } from "expo-router";
+import Toast from "react-native-toast-message";
 
 type Message = {
   message: string;
@@ -26,6 +29,9 @@ type Message = {
 };
 
 export default function ChatScreen() {
+  const myVehicles = useVehicleStore((state) => state.myVehicles);
+  const fetchMyVehicles = useVehicleStore((state) => state.fetchMyVehicles);
+  const [carOwnerId, setCarOwnerId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       message: "안녕하세요! 카지니 챗봇입니다. 어떤 도움이 필요하신가요?",
@@ -37,6 +43,18 @@ export default function ChatScreen() {
   const [isBotTyping, setIsBotTyping] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchMyVehicles();
+    }, [])
+  );
+
+  useEffect(() => {
+    if (myVehicles.length > 0) {
+      setCarOwnerId(myVehicles[0].id.toString());
+    }
+  }, [myVehicles]);
 
   useEffect(() => {
     const showSub = Keyboard.addListener("keyboardDidShow", () => {
@@ -54,10 +72,16 @@ export default function ChatScreen() {
 
   async function onSendMessage() {
     setInputText("");
+    if (!carOwnerId) {
+      Toast.show({
+        type: "error",
+        text1: "일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        position: "bottom",
+      });
+      return;
+    }
     if (!inputText.trim()) return;
 
-    // TODO: 하드코딩 삭제
-    const carOwnerId = "6";
     const { url, method } = API_ENDPOINTS.CHATBOT.MESSAGE;
     const userMessage: Message = {
       message: inputText,
@@ -107,7 +131,21 @@ export default function ChatScreen() {
     >
       <SafeAreaView className="flex-1" edges={["top"]}>
         <StatusBar style="dark" backgroundColor="#ffffff" />
-        <Header title="챗봇" />
+        <Header
+          title="챗봇"
+          Right={
+            <IconButton
+              iconName="reader-outline"
+              onPress={() => {
+                Toast.show({
+                  type: "error",
+                  text1: "대화 내역 조회는 현재 지원되지 않습니다.",
+                  position: "bottom",
+                });
+              }}
+            />
+          }
+        />
         <View className="flex-1">
           <ScrollView
             ref={scrollViewRef}

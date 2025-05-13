@@ -7,7 +7,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { MaintenanceItemStatus } from "@/src/components/vehicle";
-import { Button, ScreenLayout } from "@/src/components";
+import { Button, IconButton, ScreenLayout } from "@/src/components";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import {
@@ -68,6 +68,10 @@ export default function VehicleListScreen() {
     router.push("/vehicle/vehicle-add-step1");
   }
 
+  function onClickNotifications() {
+    router.push("/notifications");
+  }
+
   return (
     <ScreenLayout
       headerTitle="차량 관리"
@@ -78,6 +82,12 @@ export default function VehicleListScreen() {
           onRefresh={() => {
             fetchMyVehicles();
           }}
+        />
+      }
+      RightHeader={
+        <IconButton
+          iconName="notifications-outline"
+          onPress={onClickNotifications}
         />
       }
     >

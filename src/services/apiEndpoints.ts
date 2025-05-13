@@ -90,5 +90,39 @@ export const API_ENDPOINTS = {
       method: "POST",
       url: "/api/chatbot/{carOwnerId}",
     },
+    HISTORY: {
+      method: "GET",
+      url: "/api/chatbot/history/{carOwnerId}",
+    },
+  },
+  NOTIFICATION: {
+    READ: {
+      method: "PUT",
+      url: "/api/notification/{id}/read",
+    },
+    READ_ALL: {
+      method: "PUT",
+      url: "/api/notification/read-all",
+    },
+    LIST: {
+      method: "GET",
+      url: "/api/notification",
+    },
+    CLEAR: {
+      method: "DELETE",
+      url: "/api/notification",
+    },
+    GET: {
+      method: "GET",
+      url: "/api/notification/{id}",
+    },
+    DELETE: {
+      method: "DELETE",
+      url: "/api/notification/{id}",
+    },
+    UNREAD: {
+      method: "GET",
+      url: "/api/notification/unread",
+    },
   },
 };
