@@ -1,16 +1,15 @@
 import { Card, IconButton, ScreenLayout } from "@/src/components";
+import { modelImageMap } from "@/src/constants";
 import { useSafeBackRedirect } from "@/src/hooks";
 import { useVehicleStore } from "@/src/store";
 import { Card as KittenCard } from "@ui-kitten/components";
 import { router } from "expo-router";
-import { SafeAreaView, ScrollView, Text } from "react-native";
+import { Text, Image, View } from "react-native";
 
 export default function VehicleAddStep2Screen() {
   const vehicleData = useVehicleStore((state) => state.vehicleData);
   const updateVehicleData = useVehicleStore((state) => state.updateVehicleData);
   const vehicleModels = useVehicleStore((state) => state.vehicleModels);
-
-  // useSafeBackRedirect("/vehicle/vehicle-list");
 
   const models = vehicleModels.filter(
     (model) => model.brand === vehicleData.maker
@@ -46,7 +45,6 @@ export default function VehicleAddStep2Screen() {
         {models.map((car) => (
           <KittenCard
             key={car.id}
-            status="primary"
             onPress={() =>
               onClickCarModel({ modelId: car.id, model: car.model })
             }
@@ -55,7 +53,17 @@ export default function VehicleAddStep2Screen() {
               backgroundColor: "#fff",
             }}
           >
-            <Text>{car.model}</Text>
+            <View className="flex-row items-center">
+              <Image
+                source={modelImageMap[car.model]}
+                style={{
+                  width: 100,
+                  height: 50,
+                  resizeMode: "contain",
+                }}
+              />
+              <Text>{car.model}</Text>
+            </View>
           </KittenCard>
         ))}
       </Card>

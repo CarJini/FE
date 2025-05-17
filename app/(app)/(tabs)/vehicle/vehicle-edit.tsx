@@ -14,6 +14,7 @@ import { router } from "expo-router";
 import { useVehicleStore } from "@/src/store";
 import { useMaintenanceParams, useSafeBackRedirect } from "@/src/hooks";
 import Toast from "react-native-toast-message";
+import { type } from "../../../../src/components/ThemedView";
 
 // 차량 상세
 export default function VehicleEditScreen() {
@@ -111,6 +112,15 @@ export default function VehicleEditScreen() {
     });
   }
 
+  function onChangeText(value: string, field: string) {
+    if (!currentVehicle) return;
+
+    setCurrentVehicle({
+      ...currentVehicle,
+      [field]: value,
+    });
+  }
+
   useSafeBackRedirect(onBackPress);
 
   function onBackPress() {
@@ -137,6 +147,18 @@ export default function VehicleEditScreen() {
           label="차량 등록일"
           date={currentVehicle.startDate}
           onChange={onChange}
+        />
+        <InputBox
+          label="차량 시작거리(km)"
+          value={currentVehicle.startKm.toString()}
+          onChangeText={(value) => onChangeText(value, "startKm")}
+          keyboardType="numeric"
+        />
+        <InputBox
+          label="차량 현재거리(km)"
+          value={currentVehicle.nowKm.toString()}
+          onChangeText={(value) => onChangeText(value, "nowKm")}
+          keyboardType="numeric"
         />
         <Button label="삭제" color="secondary" onPress={onDelete} />
         <Button label="저장" onPress={onSave} />

@@ -81,7 +81,11 @@ export default function MaintenanceItemsScreen() {
           className="p-2 bg-white active:bg-gray-200 rounded-xl border border-gray-200 my-2"
           onPress={() => onClickDetail(item.id)}
         >
-          <MaintenanceItemStatus vehicleNowKm={vehicleInfo.nowKm} item={item} />
+          <MaintenanceItemStatus
+            vehicleNowKm={vehicleInfo.nowKm}
+            item={item}
+            isClickable
+          />
         </Pressable>
       ))}
       <View className="w-full">

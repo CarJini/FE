@@ -58,7 +58,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Error during Google login", error);
     } finally {
       setIsLoading(false);
-      console.log("complete sign in with google");
     }
   }
 

@@ -16,7 +16,7 @@ export default function LoginScreen() {
     <SafeAreaView className="flex-1 bg-white">
       <View className="basis-1/2 justify-center items-center">
         <Image
-          source={require("@/assets/images/logo.png")}
+          source={require("@/assets/images/icon.png")}
           className="w-[100px] h-[100px] mb-5"
           resizeMode="contain"
         />
@@ -26,9 +26,9 @@ export default function LoginScreen() {
         </Text>
       </View>
       <View className="basis-1/4 flex-row justify-between p-12">
-        <IconComponent iconName="wrench" text={"소모품 관리\n자동 알림"} />
-        <IconComponent iconName="comment" text={"AI 챗봇\n장비 조언"} />
-        <IconComponent iconName="bar-chart" text={"차량 관리\n통계 제공"} />
+        <IconComponent emoji="🛠" text={" 소모품 관리\n자동 알림"} />
+        <IconComponent emoji="💬" text={"AI 챗봇\n차량 Q&A"} />
+        <IconComponent emoji="📊" text={"한눈에 보는\n소모품 현황"} />
       </View>
       <View className="basis-1/4 gap-5 items-center">
         <Text className="text-sm text-gray-500 text-center">
@@ -53,11 +53,11 @@ export default function LoginScreen() {
   );
 }
 
-function IconComponent({ iconName, text }: { iconName: string; text: string }) {
+function IconComponent({ emoji, text }: { emoji: string; text?: string }) {
   return (
     <View className="flex-col items-center gap-3">
-      <View className="w-[50px] h-[50px] rounded-full bg-slate-300 justify-center items-center">
-        <Icon name={iconName} size={24} color="#000" />
+      <View className="w-[50px] h-[50px] rounded-full bg-[#dbeafe] justify-center items-center">
+        <Text style={{ fontSize: 24 }}>{emoji}</Text>
       </View>
       <Text className="text-xs text-center">{text}</Text>
     </View>

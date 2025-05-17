@@ -11,20 +11,34 @@ import { View, Text } from "react-native";
 export function MaintenanceItemStatus({
   vehicleNowKm,
   item,
+  isClickable = false,
 }: {
   vehicleNowKm: number;
   item: MaintenanceItemResponse;
+  isClickable?: boolean;
 }) {
-  const category = MaintenanceItemCategoryOptions.find(
-    (c) => c.value === item.category
-  )?.label;
+  const category =
+    MaintenanceItemCategoryOptions.find((c) => c.value === item.category)
+      ?.label ?? item.category;
   const elapsedKm = item.replacementKm - item.remainingKm;
   const daysPerMonth = 30.44;
   const totalCycleDays = item.replacementCycle * daysPerMonth;
   const elapsedDays = Math.round(totalCycleDays - item.remainingDay);
   return (
     <View className="p-2">
-      <Text className="text-lg font-bold mb-2">{category}</Text>
+      <View className={"flex-row items-center justify-between mb-5"}>
+        <View className="flex-row items-center">
+          <ItemAvatar type={category} />
+          <View className="flex-column ml-3">
+            <Text className="text-base font-bold">{category}</Text>
+            <Text className="text-xs text-gray-500">
+              매 {item.replacementKm.toLocaleString()}km 또는{" "}
+              {item.replacementCycle}개월
+            </Text>
+          </View>
+        </View>
+        {isClickable && <Text className={"text-blue-500"}>상세 보기</Text>}
+      </View>
       <ProgressBar
         progressTitle="주행거리 주기"
         progress={item.kmProgress ?? 0}
@@ -34,7 +48,7 @@ export function MaintenanceItemStatus({
       {item.dayProgress !== undefined &&
         item.replacementCycle !== undefined && (
           <>
-            <Divider style={{ marginVertical: 4 }} />
+            <Divider style={{ marginVertical: 8 }} />
             <ProgressBar
               progressTitle="기간 주기"
               progress={item.dayProgress}
@@ -43,6 +57,27 @@ export function MaintenanceItemStatus({
             />
           </>
         )}
+    </View>
+  );
+}
+
+const colorMap: { [key: string]: string } = {
+  "엔진 오일": "#4285F4",
+  "브레이크 패드": "#673AB7",
+  타이어: "#00BCD4",
+  "에어컨 필터": "#4CAF50",
+  와이퍼: "#FF9800",
+};
+
+function ItemAvatar({ type }: { type: string }) {
+  return (
+    <View
+      style={[{ backgroundColor: colorMap[type] }]}
+      className="w-10 h-10 rounded-lg items-center justify-center"
+    >
+      <Text className="text-white text-base font-bold">
+        {type.substring(0, 1)}
+      </Text>
     </View>
   );
 }
@@ -80,14 +115,13 @@ function ProgressBar({
       </View>
       <KittenProgressBar
         progress={progress / 100}
-        size="large"
+        size="medium"
         status={status === "normal" ? "primary" : status}
       />
       <View className="flex-row justify-between items-center">
         <Text className="text-sm" style={{ color: statusColor }}>
           <Text className="font-bold">{nowText}</Text> 경과
         </Text>
-
         <Text className="text-sm text-gray-600">{replacementText}</Text>
       </View>
     </View>

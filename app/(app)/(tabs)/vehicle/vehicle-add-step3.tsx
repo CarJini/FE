@@ -80,6 +80,28 @@ export default function VehicleAddStep3Screen() {
           date={currentVehicle.startDate}
           onChange={onChangeDate}
         />
+        <InputBox
+          label="차량 시작거리(km)"
+          value={currentVehicle.startKm.toString()}
+          keyboardType="numeric"
+          onChangeText={(text) =>
+            updateVehicleData((prev) => ({
+              ...prev,
+              startKm: Number(text),
+            }))
+          }
+        />
+        <InputBox
+          label="차량 현재거리(km)"
+          value={currentVehicle.nowKm.toString()}
+          keyboardType="numeric"
+          onChangeText={(text) =>
+            updateVehicleData((prev) => ({
+              ...prev,
+              nowKm: Number(text),
+            }))
+          }
+        />
         <Button label="차량 등록하기" onPress={onSave} />
       </Card>
     </ScreenLayout>

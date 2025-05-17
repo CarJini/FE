@@ -8,14 +8,13 @@ import {
 } from "react-native";
 import { MaintenanceItemStatus } from "@/src/components/vehicle";
 import { Button, IconButton, ScreenLayout } from "@/src/components";
-import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import {
   MaintenanceItemResponse,
   MaintenanceItemStatusType,
   VehicleModel,
 } from "@/src/types";
-import { useCallback, useLayoutEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import {
   Tab,
   TabBar,
@@ -23,6 +22,12 @@ import {
   Divider,
 } from "@ui-kitten/components";
 import { useVehicleStore } from "@/src/store";
+import { getMessaging } from "@react-native-firebase/messaging";
+import { getApp } from "@react-native-firebase/app";
+import { API_ENDPOINTS } from "@/src/services/apiEndpoints";
+import { apiClient } from "@/src/services/api";
+import { modelImageMap } from "@/src/constants";
+import { NoVehicles } from "@/src/components/vehicle";
 
 const statuses = ["점검 필요", "정상", "예상"] as const;
 const statusMap: Record<MaintenanceItemStatusType, string> = {
@@ -44,6 +49,7 @@ export default function VehicleListScreen() {
   const [selectedStatusByVehicle, setSelectedStatusByVehicle] = useState<
     Record<number, number>
   >({});
+  const [fcmToken, setFcmToken] = useState<string | null>(null);
 
   function onSelectStatus(vehicleId: number, statusIndex: number) {
     setSelectedStatusByVehicle((prev) => ({
@@ -51,6 +57,34 @@ export default function VehicleListScreen() {
       [vehicleId]: statusIndex,
     }));
   }
+
+  function updateFcmToken(fcmToken: string) {
+    const { method, url } = API_ENDPOINTS.USER.UPDATE_FCM_TOKEN;
+    try {
+      apiClient.request({
+        method,
+        url,
+        data: {
+          fcmToken,
+        },
+      });
+    } catch (error) {
+      console.error("Error updating FCM token:", error);
+    }
+  }
+
+  useEffect(() => {
+    const getToken = async () => {
+      const token = await getMessaging(getApp()).getToken();
+
+      if (token) {
+        setFcmToken(token);
+        updateFcmToken(token);
+      }
+    };
+
+    getToken();
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -100,19 +134,7 @@ export default function VehicleListScreen() {
           onSelectStatus={(index) => onSelectStatus(vehicle.id, index)}
         />
       ))}
-      {myVehicles.length === 0 && (
-        <View className="flex-1 items-center justify-center">
-          <View className="w-[80px] h-[80px] rounded-lg bg-slate-300 justify-center items-center mb-4">
-            <Ionicons name="car" size={32} />
-          </View>
-          <Text className="text-xl font-bold mb-2">
-            등록된 차량이 없습니다.
-          </Text>
-          <Text className="text-gray-600 opacity-80">
-            차량을 등록하고 관리해보세요.
-          </Text>
-        </View>
-      )}
+      {myVehicles.length === 0 && <NoVehicles />}
       <Button
         label={myVehicles.length === 0 ? "차량 등록" : "차량 추가 등록"}
         onPress={onClickAddVehicle}
@@ -168,10 +190,14 @@ function VehicleCard({
         className="bg-white active:bg-gray-100 rounded-lg border border-gray-200"
         onPress={onClickVehicle}
       >
-        <View className="flex-row items-center">
+        <View className="flex-row items-center p-1">
           <Image
-            source={{ uri: vehicle.image }}
-            className="w-[70px] h-[70px] rounded-lg mr-4"
+            source={modelImageMap[vehicle.model]}
+            style={{
+              width: 100,
+              height: 70,
+              resizeMode: "contain",
+            }}
           />
           <View className="flex-1 pr-3">
             <View className="flex-row justify-between items-center">
@@ -248,7 +274,11 @@ function VehicleCard({
               className="active:bg-gray-200 rounded-lg"
               onPress={() => onClickMaintenanceItem(item)}
             >
-              <MaintenanceItemStatus vehicleNowKm={vehicle.nowKm} item={item} />
+              <MaintenanceItemStatus
+                vehicleNowKm={vehicle.nowKm}
+                item={item}
+                isClickable
+              />
             </Pressable>
             {idx !== maintenanceItems.length - 1 && (
               <Divider style={styles.dividerMargin} />

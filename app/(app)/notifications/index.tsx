@@ -56,8 +56,6 @@ export default function NotificationsScreen() {
   const [notifications, setNotifications] =
     useState<Notification[]>(mockNotifications);
 
-  console.log("notifications>>>.", notifications);
-
   //   useEffect(() => {
   //     getNotifications();
   //   }, []);

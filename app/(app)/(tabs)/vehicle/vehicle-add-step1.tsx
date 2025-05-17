@@ -1,11 +1,12 @@
 import { Card, IconButton, ScreenLayout } from "@/src/components";
 import { router } from "expo-router";
 import { Card as KittenCard } from "@ui-kitten/components";
-import { SafeAreaView, ScrollView, Text } from "react-native";
+import { Text } from "react-native";
 import { VehicleModel } from "@/src/types";
-import { useEffect } from "react";
+import { FC, useEffect } from "react";
 import { useVehicleStore } from "@/src/store";
 import { useSafeBackRedirect } from "@/src/hooks";
+import { brandLogoMap, BrandName } from "@/src/constants";
 
 type VehicleMaker = {
   brand: string;
@@ -64,7 +65,6 @@ export default function VehicleAddStep1Screen() {
         {vehicleMakers.map((maker) => (
           <KittenCard
             key={maker.brand}
-            status={maker.disabled ? "basic" : "primary"}
             disabled={maker.disabled}
             onPress={() => onClickMaker(maker.brand)}
             style={{
@@ -72,7 +72,14 @@ export default function VehicleAddStep1Screen() {
               backgroundColor: maker.disabled ? "#f0f0f0" : "#fff",
             }}
           >
-            <Text>{maker.brand}</Text>
+            {(() => {
+              const BrandLogo = brandLogoMap[maker.brand as BrandName];
+              return BrandLogo ? (
+                <BrandLogo width={150} height={50} />
+              ) : (
+                <Text>{maker.brand}</Text>
+              );
+            })()}
           </KittenCard>
         ))}
       </Card>

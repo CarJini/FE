@@ -43,13 +43,14 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const { method, url: tokenRefreshUrl } = API_ENDPOINTS.AUTH.REFRESH_TOKEN;
-
+    await delay(3000);
     // 무한루프 방지
     if (
+      error.response?.status !== 401 ||
       originalRequest.url?.includes(tokenRefreshUrl) ||
-      originalRequest._retry ||
-      error.response?.status !== 401
+      originalRequest._retry
     ) {
+      console.warn("🔥🔥🔥 interceptors error ", error);
       return Promise.reject(error);
     }
 
