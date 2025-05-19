@@ -65,8 +65,8 @@ const colorMap: { [key: string]: string } = {
   "엔진 오일": "#4285F4",
   "브레이크 패드": "#673AB7",
   타이어: "#00BCD4",
-  "에어컨 필터": "#4CAF50",
-  와이퍼: "#FF9800",
+  "에어 필터": "#4CAF50",
+  냉각수: "#FF9800",
 };
 
 function ItemAvatar({ type }: { type: string }) {
