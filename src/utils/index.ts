@@ -17,8 +17,7 @@ export function mapMaintenanceResponseToRequest(
   return {
     name: response.name,
     category: response.category,
-    cycleAlarm: response.cycleAlarm ?? false,
-    kmAlarm: response.kmAlarm ?? false,
+    alarm: response.alarm ?? false,
     replacementCycle: response.replacementCycle ?? 0,
     replacementKm: response.replacementKm ?? 0,
   };

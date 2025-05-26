@@ -30,7 +30,12 @@ export function MaintenanceItemStatus({
         <View className="flex-row items-center">
           <ItemAvatar type={category} />
           <View className="flex-column ml-3">
-            <Text className="text-base font-bold">{category}</Text>
+            <View className="flex-row items-center">
+              <Text className="text-base font-bold">{category}</Text>
+              <Text className="text-sm text-gray-600">
+                {item.alarm ? "🔔" : "🔕"}
+              </Text>
+            </View>
             <Text className="text-xs text-gray-500">
               매 {item.replacementKm.toLocaleString()}km 또는{" "}
               {item.replacementCycle}개월

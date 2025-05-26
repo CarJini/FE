@@ -22,8 +22,7 @@ export type MaintenanceItemResponseMap = Record<
 type BaseMaintenanceItem = {
   name: string;
   category: MaintenanceItemCategoryType;
-  cycleAlarm: boolean;
-  kmAlarm: boolean;
+  alarm: boolean;
   replacementCycle: number;
   replacementKm: number;
 };

@@ -60,8 +60,7 @@ export default function MaintenanceItemFormScreen() {
       : {
           name: "",
           category: "ENGINE_OIL" as MaintenanceItemCategoryType,
-          cycleAlarm: false,
-          kmAlarm: false,
+          alarm: false,
           replacementCycle: 0,
           replacementKm: 0,
         };
@@ -96,16 +95,10 @@ export default function MaintenanceItemFormScreen() {
     }));
   }
 
-  function onCheckedChange({
-    checkedType,
-    checked,
-  }: {
-    checkedType: "cycleAlarm" | "kmAlarm";
-    checked: boolean;
-  }) {
+  function onAlarmChange(checked: boolean) {
     setMaintenanceItem((prev) => ({
       ...prev!,
-      [checkedType]: checked,
+      alarm: checked,
     }));
   }
 
@@ -229,8 +222,8 @@ export default function MaintenanceItemFormScreen() {
             }}
           />
         </View>
-        <View className="flex-row">
-          <View className="flex-1 mb-4">
+        <View className="flex-row gap-4 mb-3">
+          <View className="flex-1">
             <Text className="mb-2 text-sm font-medium text-gray-700">
               교체 주기 (km)
             </Text>
@@ -243,21 +236,7 @@ export default function MaintenanceItemFormScreen() {
               keyboardType="numeric"
             />
           </View>
-          <View className="ml-5 items-center">
-            <Text className="mb-3 text-sm font-medium text-gray-700">알림</Text>
-            <Toggle
-              checked={maintenanceItem.kmAlarm}
-              onChange={() =>
-                onCheckedChange({
-                  checkedType: "kmAlarm",
-                  checked: !maintenanceItem.kmAlarm,
-                })
-              }
-            />
-          </View>
-        </View>
-        <View className="flex-row">
-          <View className="flex-1 mb-4">
+          <View className="flex-1">
             <Text className="mb-2 text-sm font-medium text-gray-700">
               교체 주기 (개월)
             </Text>
@@ -270,16 +249,11 @@ export default function MaintenanceItemFormScreen() {
               keyboardType="numeric"
             />
           </View>
-          <View className="ml-5 items-center">
+          <View>
             <Text className="mb-3 text-sm font-medium text-gray-700">알림</Text>
             <Toggle
-              checked={maintenanceItem.cycleAlarm}
-              onChange={() =>
-                onCheckedChange({
-                  checkedType: "cycleAlarm",
-                  checked: !maintenanceItem.cycleAlarm,
-                })
-              }
+              checked={maintenanceItem.alarm}
+              onChange={() => onAlarmChange(!maintenanceItem.alarm)}
             />
           </View>
         </View>

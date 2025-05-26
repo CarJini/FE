@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { Card as KittenCard } from "@ui-kitten/components";
 import { Text } from "react-native";
 import { VehicleModel } from "@/src/types";
-import { FC, useEffect } from "react";
+import { useEffect } from "react";
 import { useVehicleStore } from "@/src/store";
 import { useSafeBackRedirect } from "@/src/hooks";
 import { brandLogoMap, BrandName } from "@/src/constants";
@@ -70,6 +70,7 @@ export default function VehicleAddStep1Screen() {
             style={{
               marginVertical: 4,
               backgroundColor: maker.disabled ? "#f0f0f0" : "#fff",
+              alignItems: "center",
             }}
           >
             {(() => {

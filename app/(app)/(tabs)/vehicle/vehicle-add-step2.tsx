@@ -53,7 +53,7 @@ export default function VehicleAddStep2Screen() {
               backgroundColor: "#fff",
             }}
           >
-            <View className="flex-row items-center">
+            <View className="flex-row items-center gap-x-3">
               <Image
                 source={modelImageMap[car.model]}
                 style={{

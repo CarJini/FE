@@ -14,7 +14,6 @@ import { router } from "expo-router";
 import { useVehicleStore } from "@/src/store";
 import { useMaintenanceParams, useSafeBackRedirect } from "@/src/hooks";
 import Toast from "react-native-toast-message";
-import { type } from "../../../../src/components/ThemedView";
 
 // 차량 상세
 export default function VehicleEditScreen() {
