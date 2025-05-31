@@ -21,7 +21,7 @@ import {
   Text as KittenText,
   Divider,
 } from "@ui-kitten/components";
-import { useVehicleStore } from "@/src/store";
+import { useNotificationStore, useVehicleStore } from "@/src/store";
 import { getMessaging } from "@react-native-firebase/messaging";
 import { getApp } from "@react-native-firebase/app";
 import { API_ENDPOINTS } from "@/src/services/apiEndpoints";
@@ -43,6 +43,11 @@ export default function VehicleListScreen() {
   const maintenanceItemsByVehicle = useVehicleStore(
     (state) => state.maintenanceItemsByVehicle
   );
+  const fetchNotifications = useNotificationStore(
+    (state) => state.fetchNotifications
+  );
+  const unreadCount = useNotificationStore((state) => state.unreadCount);
+
   const fetchMaintenanceItems = useVehicleStore(
     (state) => state.fetchMaintenanceItems
   );
@@ -89,6 +94,7 @@ export default function VehicleListScreen() {
   useFocusEffect(
     useCallback(() => {
       fetchMyVehicles();
+      fetchNotifications();
     }, [])
   );
 
@@ -115,14 +121,20 @@ export default function VehicleListScreen() {
           refreshing={false}
           onRefresh={() => {
             fetchMyVehicles();
+            fetchNotifications();
           }}
         />
       }
       RightHeader={
-        <IconButton
-          iconName="notifications-outline"
-          onPress={onClickNotifications}
-        />
+        <View className="relative">
+          <IconButton
+            iconName="notifications-outline"
+            onPress={onClickNotifications}
+          />
+          {unreadCount > 0 && (
+            <View className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-red-500" />
+          )}
+        </View>
       }
     >
       {myVehicles.map((vehicle) => (
