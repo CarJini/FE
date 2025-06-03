@@ -8,6 +8,7 @@ export type Notification = {
   message: string;
   type: string;
   maintenanceItemId: number;
+  carId: number;
   createdAt: Date;
   read: boolean;
 };

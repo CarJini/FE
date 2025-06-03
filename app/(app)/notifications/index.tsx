@@ -40,17 +40,9 @@ export default function NotificationsScreen() {
     router.replace(`/vehicle/vehicle-list`);
   }
 
-  function onClickNotification(notification: Notification) {
-    Toast.show({
-      type: "error",
-      text1: "알림 클릭",
-      text2: `알림 ID: ${notification.id}`,
-    });
-
+  function onClickNotification(n: Notification) {
     router.push(
-      `/vehicle/maintenance-item-detail?vehicleId=${3}&itemId=${
-        notification.maintenanceItemId
-      }`
+      `/vehicle/maintenance-item-detail?vehicleId=${n.carId}&itemId=${n.maintenanceItemId}`
     );
   }
 

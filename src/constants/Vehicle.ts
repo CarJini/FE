@@ -11,7 +11,7 @@ import SamsungLogo from "@/assets/images/samsung.svg";
 
 export const modelImageMap: Record<string, any> = {
   Staria: StariaImage,
-  "Grandeur gn7": Gn7Image,
+  "Grandeur": Gn7Image,
   K5: K5Image,
   Sonata: Dn8Image,
   SM6: Sm6Image,

@@ -44,6 +44,7 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
     const { method, url: tokenRefreshUrl } = API_ENDPOINTS.AUTH.REFRESH_TOKEN;
     await delay(3000);
+    
     // 무한루프 방지
     if (
       error.response?.status !== 401 ||
